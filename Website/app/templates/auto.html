@@ -1,0 +1,103 @@
+<!-- Automatische Beregnungsplanung -->
+<!-- Kopfzeile -->
+{% extends "base.html" %}
+{% block title %}Auto{% endblock %}
+{% block nav %}
+    <div class="w3-panel w3-bar w3-light-grey">
+        <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
+        <a href="{{ url_for('index') }}" class="w3-bar-item w3-button">Manuell</a>
+        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button w3-red">Neuer Auftrag</a>
+        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
+        <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
+    </div>
+{% endblock %}
+<!-- Inhalt Seite -->
+{% block content %}
+    <form action="" method="post" novalidate>
+        {{ form_input.hidden_tag() }}
+        <div class="w3-panel w3-padding-small"> 
+        <h1 title="Hier kann man zukünftige Beregnungen vorausplanen. Hierfür die Start- und Endzeit eingeben sowie die gewünschten Tennisplätze auswählen">
+        Neuen Beregnungsauftrag hinzufügen</h2>
+        </div>
+        <div class="w3-panel w3-border w3-round w3-margin w3-padding-small">
+        <!-- Obere Zeile --> 
+        <div class="w3-row-padding">
+            <!-- Datum-Eingabe -->
+            <div class="w3-third">
+                <label>Datum</label>
+                <input class="w3-input w3-border w3-hover-light-grey" type="date" name="date_start" style="width:80%" max="2220-12-31" min= {}>
+                {% for error in form_input.date_start.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <!-- Uhrzeit-Eingabe -->
+            <div class="w3-third">
+                <label>Zeit</label>
+                <input class="w3-input w3-border w3-hover-light-grey" type="time" name="time_start" style="width:50%">
+                {% for error in form_input.time_start.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <!-- Beregnungszeit-Eingabe -->  
+            <div class="w3-third">
+                <label>Dauer Beregnung pro Platz</label>
+                <input class="w3-input w3-border w3-hover-light-grey" type="number" name="time_dauer" style="width:40%" min="1" max="60">
+                {% for error in form_input.time_dauer.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Untere Zeile mit Button 1-7-->
+        <div class="w3-row-padding w3-margin">
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_1 checked="checked">
+                <label>Platz 1</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_2 checked="checked">
+                <label>Platz 2</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_3 checked="checked">
+                <label>Platz 3</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_4 checked="checked">
+                <label>Platz 4</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_5 checked="checked">
+                <label>Platz 5</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_6 checked="checked">
+                <label>Platz 6</label>
+            </div>
+            <div class="w3-quarter">
+                <input class="w3-check" type="checkbox" name=platz_7 checked="checked">
+                <label>Platz 7</label>
+            </div>
+        </div>
+        <div class="w3-row-padding">
+            <!-- Zyklus -->
+	    <!--
+            <div class="w3-half">
+                <label>Zyklus erstellen</label>
+                <select class="w3-select w3-border" name="zyklus_zeit">
+                    <option value="0" selected>keine Wiederholung</option>
+                    <option value="0,5">Wiederholung alle 12h</option>
+                    <option value="1">Wiederholung täglich</option>
+                    <option value="2">Wiederholung alle 2 Tage</option>
+                    <option value="7">Wiederholung wöchentlich</option>
+                </select>
+            </div>
+	    -->
+        </div>
+        <!-- Submit -->
+        <div>
+            <input type="submit" class="btn" name=submit value="Absenden">
+        </div>
+        </div>
+    </form>
+
+{% endblock %}

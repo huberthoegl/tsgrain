@@ -1,0 +1,20 @@
+<!-- Kopfzeile -->
+{% extends "base.html" %}
+<!-- Inhalt erste Seite -->
+{% block content %}
+    <form action="" method="post" novalidate>
+        {{ form_status.hidden_tag() }}
+        <!-- 1. Sektor: Statusanzeige -->
+    	<h1 title="In diesem Abschnitt wird der aktuelle Zustand der beregnung angezeigt. Grün hinterlegte Knöpfe bedutet dass die Beregnung auf diesem Tennisplatz aktiv ist">
+        Aktueller Beregnungsstatus</h1>
+        <p>
+            {{ form_status.status_platz_1() }}
+            {{ form_status.status_platz_2() }}
+            {{ form_status.status_platz_3() }}
+            {{ form_status.status_platz_4() }}
+            {{ form_status.status_platz_5() }}
+            {{ form_status.status_platz_6() }}
+            {{ form_status.status_platz_7() }}
+        </p>
+    </form>
+{% endblock %}

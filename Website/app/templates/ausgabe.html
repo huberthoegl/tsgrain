@@ -1,0 +1,79 @@
+<!-- Automatische Beregnungsplanung -->
+<!-- Kopfzeile -->
+{% extends "base.html" %}
+{% block title %}Auto{% endblock %}
+{% block nav %}
+    <div class="w3-panel w3-bar w3-light-grey">
+        <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
+        <a href="{{ url_for('index') }}" class="w3-bar-item w3-button">Manuell</a>
+        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
+        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button w3-red">Bestehende Aufträge</a>
+        <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
+    </div>
+{% endblock %}
+{% block content %}
+<div class="w3-row-padding w3-margin">
+   <h1>Termine</h1>
+        <div class="w3-responsive">
+        <table class="w3-table-all w3-hoverable sortable">
+        <thead>
+        <tr class="w3-dark-grey">
+            <th class="w3-center">Start der Beregnung</th>
+            <th class="w3-center">Dauer</th>
+            <th class="w3-center">Wiederholung</th>
+            <th class="w3-center">1</th>
+            <th class="w3-center">2</th>
+            <th class="w3-center">3</th>
+            <th class="w3-center">4</th>
+            <th class="w3-center">5</th>
+            <th class="w3-center">6</th>
+            <th class="w3-center">7</th>
+            <th class="w3-center">Löschen</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for termin in termine %}
+            <tr>
+            <td>
+                {{termin.datumuhrzeit_start|datetime }}
+            </td>
+            <td class="w3-center">
+                {{termin.time_dauer}}
+            </td>
+            <td class="w3-center">
+                {{termin.zyklus|zyklus}}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_1|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_2|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_3|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_4|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_5|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_6|platz }}
+            </td>
+            <td class="w3-center">
+                {{termin.platz_7|platz }}
+            </td>
+            <td class="w3-center">
+                <form method="POST" action="/delete">
+                    <input type="hidden" value="{{termin.datumuhrzeit_start}}" name="uhrzeit">
+                    <input type="submit" class="btn" value="Löschen">
+                </form>
+            </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+<!-- Manuelle Beregnungsplanung -->
+<!-- Kopfzeile -->
+{% extends "base.html" %}
+{% block title %}Manuell{% endblock %}
+{% block nav %}
+    <div class="w3-panel w3-bar w3-light-grey">
+        <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
+        <a href="{{ url_for('index') }}" class="w3-bar-item w3-button w3-red">Manuell</a>
+        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
+        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
+        <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
+    </div>
+{% endblock %}
+<!-- Inhalt erste Seite -->
+{% block content %}
+    <form action="" method="post" novalidate>
+        {{ status_form.hidden_tag() }}
+        <div class="w3-panel w3-padding-small"> 
+        <!-- 1. Sektor: Statusanzeige -->
+    	<h1 title="In diesem Abschnitt wird der aktuelle Zustand der Beregnung angezeigt. Ein grün hinterlegter Knöpf bedeutet dass die Beregnung auf diesem Tennisplatz aktiv ist.">
+        Aktueller Beregnungsstatus (nicht aktiv zur Zeit!)</h1>
+        </div>
+        <!-- Untere Zeile mit Button 1-7-->
+        <table class="w3-table w3-centered" id="myTable">
+            <tr>
+                <td>
+                    <input type="submit" class="btn" name=platz_1 value="Platz 1">
+                </td>
+                <td>
+                    <input type="submit" class="btn" name=platz_2 value="Platz 2">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" class="btn" name=platz_3 value="Platz 3">
+                </td>
+                <td>
+                    <input type="submit" class="btn" name=platz_4 value="Platz 4">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" class="btn" name=platz_5 value="Platz 5">
+                </td>
+                <td>
+                    <input type="submit" class="btn" name=platz_6 value="Platz 6">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" class="btn" name=platz_7 value="Platz 7">
+                </td>
+            </tr>
+        </table>
+    </form>
+
+<script>
+// Logik um Buttons bei aktiver Beregnung grün anzeigen zu können
+var aktive_plaetze = [{{bits[0]}}, {{bits[1]}}, {{bits[2]}}, {{bits[3]}},
+                      {{bits[4]}}, {{bits[5]}}, {{bits[6]}}];
+var header = document.getElementById("myTable");
+var btns = header.getElementsByClassName("btn");
+
+/* disabled: need a better solution 
+for (var i = 0; i < btns.length; i++) {
+    if (aktive_plaetze[i] == 1){
+        btns[i].className += " active";
+    }
+}
+*/
+</script>
+
+{% endblock %}

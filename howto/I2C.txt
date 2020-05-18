@@ -1,0 +1,188 @@
+I2C und RPi3
+
+2020-05-13 
+
+Lit.: 
+- http://www.netzmafia.de/skripten/hardware/RasPi/RasPi_I2C.html
+- https://www.waveshare.com/wiki/Raspberry_Pi_Tutorial_Series:_I2C
+- https://www.youtube.com/watch?v=4AmghIphVPw
+
+pi@rpi:~ $ cat /etc/issue
+Raspbian GNU/Linux 10 \n \l
+
+pi@rpi:~ $ cat /etc/debian_version 
+10.1
+
+pi@rpi:~ $ uname -a
+Linux rpi 4.19.75-v7+ #1270 SMP Tue Sep 24 18:45:11 BST 2019 armv7l GNU/Linux
+
+Am I2C Bus sind zwei MCP23017 (Nr. 0x23 und 0x27)
+
+Installieren: i2c-tools, python-smbus
+
+I2C aktivieren: sudo raspi-config
+
+Man pages der i2c-tools:
+
+   i2cdetect           i2cget              i2c-stub-from-dump  
+   i2cdump             i2cset              i2ctransfer    
+
+pi@rpi:~ $ i2cdetect -V
+i2cdetect version 4.1
+
+pi@rpi:~ $ ls /dev/i2c-1 
+
+pi@rpi:~ $ i2cdetect -F 1
+Functionalities implemented by /dev/i2c-1:
+I2C                              yes
+SMBus Quick Command              yes
+SMBus Send Byte                  yes
+SMBus Receive Byte               yes
+SMBus Write Byte                 yes
+SMBus Read Byte                  yes
+SMBus Write Word                 yes
+SMBus Read Word                  yes
+SMBus Process Call               yes
+SMBus Block Write                yes
+SMBus Block Read                 no
+SMBus Block Process Call         no
+SMBus PEC                        yes
+I2C Block Write                  yes
+I2C Block Read                   yes
+
+
+pi@rpi:~ $ i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+     00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     20: -- -- -- 23 -- -- -- 27 -- -- -- -- -- -- -- -- 
+     30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+     70: -- -- -- -- -- -- -- --             
+
+
+Der RTC DS3231 hat die Adresse 0x68 (nicht gezeigt).
+
+
+pi@rpi:~ $ i2cdump -y 1 0x23                                                                             
+No size specified (using byte-data access)                                                               
+  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef                                  
+  00: ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................    
+  10: 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00    ..?............. 
+  20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................    
+  30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................     
+  40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................   
+  50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+  f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00    ................
+
+i2cdump -y 1 0x68    # DS3231
+
+i2cset -y 1 0x68 0x00 0x13   # DS3231: write 0x13 to address 0x00 
+
+i2cget -y 1 0x68 0x00
+
+i2cget [-f] [-y] i2cbus chip-address [data-address [mode]]
+
+i2cset [-f] [-y] [-r] i2cbus chip-address data-address [value] ... [mode]
+
+
+Treiber:
+
+pi@rpi:~ $ ls /sys/module/i2c_bcm2835/
+coresize  holders   initstate  parameters  sections    taint
+drivers   initsize  notes      refcnt      srcversion  uevent
+
+Kernelmodul auf dem RPi3: i2c_bcm2835, i2c_dev.
+
+Man kann beim Laden Argumente mitgeben:
+
+sudo modprobe -r i2c_bcm2835              # Modul entladen
+sudo modprobe i2c_bcm2835 baudrate=40000  # und wieder neu laden
+
+
+-----
+
+
+DS3231 am RPi3
+--------------
+
+https://pimylifeup.com/raspberry-pi-rtc/
+
+1. Add 
+
+   dtoverlay=i2c-rtc,ds3231
+
+   at end of /boot/config.txt. Reboot.
+   Es gibt die Datei /boot/overlays/i2c-rtc.dtbo. Innerhalb der Datei gibt 
+   es einen Abschnitt ds3231.
+
+2. sudo i2cdetect -y 1
+
+   You should see a wall of text appear, if UU appears instead of 68 then we
+   have successfully loaded in the Kernel driver for our RTC circuit.
+
+3. sudo apt-get -y remove fake-hwclock
+   sudo update-rc.d -f fake-hwclock remove
+
+4. sudo nano /lib/udev/hwclock-set
+
+   Comment out 
+
+   if [ -e /run/systemd/system ] ; then
+       exit 0
+   fi
+
+   Am Ende dieser Datei sieht man den Aufruf
+
+      /sbin/hwclock --rtc=$dev --hctosys
+
+   Damit wird die Systemzeit vom RTC gesetzt (entspricht -s)
+
+5. Read time from RTC: 
+
+    sudo hwclock --verbose -r    (-D ist Debug Option, heisst jetzt --verbose)
+      
+   Dieser Befehl sollte funktionieren!
+
+   Read RPi time: date
+
+   Write time _to_ RTC module: sudo hwclock -w
+
+   sudo hwclock -r
+
+Fertig.
+
+Kommentare:
+
+hwclock -s    # Systemzeit vom RTC setzen
+
+Schoener Test: Systemzeit auf Vergangenheit setzen:
+sudo date -s "Wed Nov 29 14:00:00 UTC+1 2017"  
+Danach neu Booten. Dann soll Zeit wieder passen.
+
+Aktuell: Wed Mai 13 16:39:00 UTC+1 2020
+
+Sommerzeit: UTC+2  (= CEST, "Central European Summer Time")
+Winterzeit: UTC+1 
+
+Beispiel fuer date: "Mi 13. Mai 16:51:25 CEST 2020"
+
+Bei der Zeit auch pruefen, ob die richtige Zeitzone eingestellt ist:
+
+sudo dpkg-reconfigure tzdata
+
+---
+
+udev Verzeichnisse: /run/udev/, /lib/udev/, /etc/udev/.
+

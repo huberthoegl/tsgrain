@@ -1,0 +1,52 @@
+<html>
+    <head>
+        {% if title %}
+        <title> {% block title %}{% endblock %}  - Tennis Beregnung</title>
+        {% else %}
+        <title>Website</title>
+        {% endif %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='w3.css') }}">
+        <!-- Die Eigenen Styles -->
+        <style type="text/css">
+        h1{font-size:18px;}
+        h2{font-size:16px;}
+        h3{font-size:16px;}
+        .btn {
+            border: round;
+            outline: none;
+            padding: 5px 5px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px
+        }
+        .active {
+            background-color: green;
+            color: white;
+        }
+        .btn:hover {
+            background-color: #666;
+            color: white;
+        }
+        </style>
+    </head>
+    <!-- Die Webseiten Struktur -->
+    <body>
+        {% block nav %}{% endblock %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+
+    <script>
+    // Technik um Buttons aufleuchten zu lassen
+    </script>
+</html>
