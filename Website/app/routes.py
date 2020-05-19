@@ -68,19 +68,19 @@ def manuell():
         else: 
             logger.info("unknown button pressed")
         
-        #msg = json.dumps({"cmd": "press-button", "n": n})
-        #logger.info("queue_c_to_s.put: {}".format(msg))
-        #if config.IPC_FLAG: queue_c_to_s.put(msg)
-
-        #resp = queue_s_to_c.get() # ok
-        #logger.info("queue_s_to_c.get: {}".format(resp))
+        msg = json.dumps({"cmd": "press-button", "n": n})
+        logger.info("queue_c_to_s.put: {}".format(msg))
+        if config.IPC_FLAG: 
+            queue_c_to_s.put(msg)
+            resp = queue_s_to_c.get() # ok
+        logger.info("queue_s_to_c.get: {}".format(resp))
 
     import time as ti; ti.sleep(0.1)
     msg = '{"cmd": "get-outputs"}'
     logger.info("queue_c_to_s.put: {}".format(msg))
-    #if config.IPC_FLAG: queue_c_to_s.put(msg) 
-    #outputs = queue_s_to_c.get()
-    outputs = 0x00
+    if config.IPC_FLAG: 
+        queue_c_to_s.put(msg) 
+        outputs = queue_s_to_c.get()
     # outputs is a byte (0, b6, b5, b4, b3, b2, b1, b0)
     # bits is a list [b0, b1, b2, b3, b4, b5, b6]
     b0 = 1 if outputs&0x01 else 0

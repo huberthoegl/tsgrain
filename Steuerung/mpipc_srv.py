@@ -61,7 +61,7 @@ def worker():
                reply = 'ok'
                logger.info("ipc reply: {}".format(reply))
                queue_s_to_c.put(reply)
-               time.sleep(0.5)
+               time.sleep(0.1)
             if D['cmd'] == 'get-outputs':
                outputs = manual_control.out.get()
                logger.info("ipc reply: {}".format(outputs))

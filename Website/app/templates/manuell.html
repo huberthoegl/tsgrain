@@ -17,8 +17,8 @@
         {{ status_form.hidden_tag() }}
         <div class="w3-panel w3-padding-small"> 
         <!-- 1. Sektor: Statusanzeige -->
-    	<h1 title="In diesem Abschnitt wird der aktuelle Zustand der Beregnung angezeigt. Ein grün hinterlegter Knöpf bedeutet dass die Beregnung auf diesem Tennisplatz aktiv ist.">
-        Aktueller Beregnungsstatus (nicht aktiv zur Zeit!)</h1>
+    	<h1 title="Manuelle Beregnung">
+        Manuelle Beregnung (der aktive Zustand wird zur Zeit nicht angezeigt)</h1>
         </div>
         <!-- Untere Zeile mit Button 1-7-->
         <table class="w3-table w3-centered" id="myTable">
@@ -61,7 +61,7 @@ var aktive_plaetze = [{{bits[0]}}, {{bits[1]}}, {{bits[2]}}, {{bits[3]}},
 var header = document.getElementById("myTable");
 var btns = header.getElementsByClassName("btn");
 
-/* disabled: need a better solution 
+/* XXX disabled - need some ajax to find out when output goes back to zero  
 for (var i = 0; i < btns.length; i++) {
     if (aktive_plaetze[i] == 1){
         btns[i].className += " active";
