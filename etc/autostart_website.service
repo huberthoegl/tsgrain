@@ -1,0 +1,11 @@
+[Unit]
+Description=My Script Service
+After=multi-user.target
+
+[Service]
+Type=idle
+Environment="PYTHONPATH=/home/pi/tsgrain"
+ExecStart=/home/pi/venv/bin/python3 /home/pi/tsgrain/Website/start_website.py
+
+[Install]
+WantedBy=multi-user.target

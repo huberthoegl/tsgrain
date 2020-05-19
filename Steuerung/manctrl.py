@@ -67,12 +67,6 @@ class ManCtrl(Singleton):
         self.state = MC_INACTIVE
         self.logger.info("pb_pressed: manual timer expired for {}".format(self.key))
         self.out.off(pbutton.key_to_index(self.key))
-        # XXX sometimes exactly at this point immediately a new pb_pressed()
-        # event is started for court PB1, so that after PBX has stopped, 
-        # immediately PB1 starts to run. Try to stop that strange behaviour by
-        # clearing the interrupts directly in the MCP23017.
-        if config.PLATFORM == 'rpi':
-            mcp23017.read_intcapa()   # clear intr
         self.key = None
 
     def disable(self):

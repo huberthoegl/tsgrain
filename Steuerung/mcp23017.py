@@ -21,6 +21,9 @@ def mcp_handler(intr_nr):
     '''Interrupt Service Routine fuer I2C Expander 2, PORTA
     '''
     key_nr = read_interrupt()  
+    if key_nr == None:
+        logger.info("mcp_handler: read_interrupt NONE KEY")
+        return  # key could not be identified
     time.sleep(0.1)
     capa = read_intcapa()
     if capa == 255:
@@ -28,7 +31,22 @@ def mcp_handler(intr_nr):
         release_handler(intr_nr, key_nr)
     else:
         logger.info("mcp_handler: calling press_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
-        press_handler(intr_nr, key_nr)
+        if capa == 0xfe: # P1
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xfd: # P2
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xfb: # P3
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xf7: # P4
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xef: # P5
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xdf: # P6
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xbf: # P7
+            press_handler(intr_nr, key_nr)
+        elif capa == 0x7f: # PBAutoOff
+            press_handler(intr_nr, key_nr)
 
 
 def add_press_handler(f):

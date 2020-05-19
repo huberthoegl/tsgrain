@@ -1,4 +1,9 @@
 
+autostart_steuerung.service
+autostart_website.service
+     Diese beiden Dateien in /etc/systemd/system/ kopieren und
+     "systemctl daemon-reload" eingeben.
+
 db/
      Ein paar Demos zur TinyDB
 
