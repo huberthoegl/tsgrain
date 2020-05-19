@@ -1,3 +1,3 @@
 
 ctags:
-	ctags *.py
+	ctags *.py ../config.py

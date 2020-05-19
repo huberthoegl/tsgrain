@@ -6,8 +6,12 @@ import smbus
 import time
 import array
 import math
+import logging
+import config
  
 bus = smbus.SMBus(1)
+
+logger = logging.getLogger(config.TSGRAIN_LOGGER)
 
 press_handler = None
 release_handler = None
@@ -20,8 +24,10 @@ def mcp_handler(intr_nr):
     time.sleep(0.1)
     capa = read_intcapa()
     if capa == 255:
+        logger.info("mcp_handler: calling release_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
         release_handler(intr_nr, key_nr)
     else:
+        logger.info("mcp_handler: calling press_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
         press_handler(intr_nr, key_nr)
 
 
@@ -140,20 +146,21 @@ def read_interrupt():
 
 
 def read_tasten():
-    # Vorsicht: Schaltet Interrupts wieder ein
+    '''Manual: "The interrupt condition is cleared after the LSB of the data is clocked out during
+    a read command of GPIO or INTCAP."
+    '''
     return bus.read_byte_data(expand_2, GPIOA_2) 
     
 
 def read_intcapa():
-    # Vorsicht: Schaltet Interrupts wieder ein
+    '''Manual: "The interrupt condition is cleared after the LSB of the data is clocked out during
+    a read command of GPIO or INTCAP."
+    '''
     return bus.read_byte_data(expand_2, INTCAPA_2) 
 
 
-def reset_interrupt():
-    Gpio_wert = bus.read_byte_data(expand_2, GPIOA_2)    
 
-
-def setDefaultRelaisOutput(): #sofortiges Setzen beim Starten der Steuerung
+def setDefaultRelaisOutput(): # sofortiges Setzen beim Starten der Steuerung
     bus.write_byte_data(expand_1, OLATB_1, 0xFF)
 
 

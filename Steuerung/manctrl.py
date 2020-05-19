@@ -9,17 +9,13 @@ if config.PLATFORM == 'pc':
    import pbutton_pc as pbutton
 else:  # PLATFORM == 'rpi'
    import pbutton_rpi as pbutton
+   import mcp23017
 from singleton import Singleton
 import db
 
-if config.PLATFORM == 'pc':
-    SEC_PER_MIN = 1  # for testing
-else:
-    SEC_PER_MIN = 60 # correct
 
-
-MC_ACTIVE = 'MC_KEY'
-MC_INACTIVE = 'MC_INACTIVE'
+MC_ACTIVE = 'MC_KEY'   # manual control active
+MC_INACTIVE = 'MC_INACTIVE' # ... inactive 
 
 
 class ManCtrl(Singleton):
@@ -34,9 +30,15 @@ class ManCtrl(Singleton):
         self.db = db.RainDB()
 
     def pb_pressed(self, key):
-        '''Pushbutton 1-7 press events. 
+        '''Pushbutton PB1-PB7 and PBAutoOff press events. 
         '''
+        if key == pbutton.PBAutoOff:
+            # XXX do something
+            return
+
         if key not in pbutton.MAN_KEYS or self.disabled:
+            self.state = MC_INACTIVE
+            self.key = None
             return
 
         if not self.disabled and self.state == MC_ACTIVE:
@@ -49,7 +51,7 @@ class ManCtrl(Singleton):
         elif not self.disabled and self.state == MC_INACTIVE:
             self.key = key
             self.state = MC_ACTIVE
-            delay_in_s = int(self.db.get_setting_val('manual_delay'))*SEC_PER_MIN
+            delay_in_s = int(self.db.get_setting_val('manual_delay'))*config.SEC_PER_MIN
             self.dtimer.set_delay(delay_in_s)
             self.dtimer.set_cb(self.delay_end)
             self.dtimer.run()
@@ -60,9 +62,17 @@ class ManCtrl(Singleton):
             self.logger.info("pb_pressed: button {} ignored".format(key))
 
     def delay_end(self):
+        '''called when timer has expired or when the button has been pressed a second time.
+        '''
         self.state = MC_INACTIVE
         self.logger.info("pb_pressed: manual timer expired for {}".format(self.key))
         self.out.off(pbutton.key_to_index(self.key))
+        # XXX sometimes exactly at this point immediately a new pb_pressed()
+        # event is started for court PB1, so that after PBX has stopped, 
+        # immediately PB1 starts to run. Try to stop that strange behaviour by
+        # clearing the interrupts directly in the MCP23017.
+        if config.PLATFORM == 'rpi':
+            mcp23017.read_intcapa()   # clear intr
         self.key = None
 
     def disable(self):

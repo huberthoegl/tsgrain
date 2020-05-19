@@ -57,9 +57,6 @@ class PButtons:
         mcp23017.add_press_handler(pb_press_handler)
         mcp23017.add_release_handler(pb_release_handler)
 
-    def _release(self, key_nr): 
-        self.pressed = False
-
     def _press(self, key_nr):
         '''The _press() method can be called multiple times, but it calls
         the callback functions only at the first time. This is a good 
@@ -88,6 +85,10 @@ class PButtons:
             self.pressed = True
             for f in self.cblist:
                 f(self.panelkey)
+
+    def _release(self, key_nr): 
+        self.pressed = False
+        self.panelkey = None
 
     def subscribe(self, cb):
         self.cblist.append(cb)
