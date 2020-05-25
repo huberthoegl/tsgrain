@@ -2,6 +2,7 @@
 
 class Termin:
     def __init__(self):
+        self.status = None
         self.datumuhrzeit_start = None 
         self.time_dauer = None
         self.platz_1 = None

@@ -139,12 +139,11 @@ def auto():
                 crts = crts + "*"
             else:
                 crts = crts + "."
-            # cycle is "0", "0.5", "1", "2", "7 
 
             # all job entries are strings!
-            js = json.dumps({"start": dtstr, "duration": form_input.time_dauer.data, 
-                             "courts": crts, "cycle": "0"})  # form_input.zyklus_zeit.data})
-            # cycle disabled for testing
+            js = json.dumps({"status": "act", 
+                             "start": dtstr, "duration": form_input.time_dauer.data, 
+                             "courts": crts, "cycle": form_input.zyklus_zeit.data})
 
             msg = '{"cmd": "store-job", "job": ' + js + '}'
             logger.info('routes.py auto/: {}'.format(msg))
@@ -173,6 +172,7 @@ def ausgabe():
     termine = []
     for job in jobs:
         t = termin.Termin()
+        t.status = job["status"]
         t.datumuhrzeit_start = job["start"] 
         t.time_dauer = job["duration"] 
         if job["courts"][0] == '*': 
@@ -203,9 +203,21 @@ def ausgabe():
             t.platz_7 = True 
         else: 
             t.platz_7 = False
-        t.zyklus = job["cycle"]   # "0", "0.5", "1", "2", "7"
+        t.zyklus = job["cycle"]   # "0": no cycle, "24": daily 
         termine.append(t)
     return render_template('ausgabe.html', title='Aufträge', termine=termine)
+
+
+
+@app.route('/flipstatus', methods=['POST'])
+def jobstatus():
+    datumuhrzeit_start = request.form.get('uhrzeit')
+    if config.IPC_FLAG: 
+        msg = '{"cmd": "toggle-status", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
+        queue_c_to_s.put(msg)
+        r = queue_s_to_c.get() 
+    return redirect(url_for('ausgabe'))
+
 
 
 @app.route("/delete", methods=["POST"])
@@ -291,14 +303,8 @@ def format_platz(value):
 def format_zyklus(value):
     if value == "0":
         return 'einmalig'
-    elif value == "0,5":
-        return 'alle 12h'
-    elif value == "1":
+    elif value == "24":
         return 'täglich'
-    elif value == "2":
-        return 'alle 2 Tage'
-    elif value == "7":
-        return 'wöchentlich'
     else:
         return 'unbekannt'
 

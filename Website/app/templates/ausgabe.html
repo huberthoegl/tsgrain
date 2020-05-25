@@ -18,6 +18,7 @@
         <table class="w3-table-all w3-hoverable sortable">
         <thead>
         <tr class="w3-dark-grey">
+            <th class="w3-center">Status</th>
             <th class="w3-center">Start der Beregnung</th>
             <th class="w3-center">Dauer</th>
             <th class="w3-center">Wiederholung</th>
@@ -28,12 +29,16 @@
             <th class="w3-center">5</th>
             <th class="w3-center">6</th>
             <th class="w3-center">7</th>
+            <th class="w3-center">Status</th>
             <th class="w3-center">Löschen</th>
         </tr>
         </thead>
         <tbody>
             {% for termin in termine %}
             <tr>
+            <td class="w3-center">
+                {{termin.status}}
+            </td>
             <td>
                 {{termin.datumuhrzeit_start|datetime }}
             </td>
@@ -63,6 +68,12 @@
             </td>
             <td class="w3-center">
                 {{termin.platz_7|platz }}
+            </td>
+            <td class="w3-center">
+                <form method="POST" action="/flipstatus">
+                    <input type="hidden" value="{{termin.datumuhrzeit_start}}" name="uhrzeit">
+                    <input type="submit" class="btn" value="Status">
+                </form>
             </td>
             <td class="w3-center">
                 <form method="POST" action="/delete">

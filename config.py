@@ -1,9 +1,9 @@
 
-USER = '~pi'
-# USER = '~hhoegl'
+# USER = '~pi'
+USER = '~hhoegl'
 
-PLATFORM = 'rpi'
-# PLATFORM = 'pc'  # 'pc', 'rpi'
+# PLATFORM = 'rpi'
+PLATFORM = 'pc'  # 'pc', 'rpi'
 
 import os
 homedir = os.path.expanduser(USER)

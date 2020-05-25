@@ -37,6 +37,17 @@ class RainDB(Singleton):
         r = jobs.remove(where('start') == date) 
         return r  # returns list of deleted doc_ids
 
+    def toggle_status(self, date):
+        jobs = self.db.table('jobs', cache_size=0)
+        lod = jobs.search(where('start') == date) 
+        status = lod[0]['status']
+        if status == "act":
+            status = "ina"
+        else:
+            status = "act"
+        r = jobs.update({"status": status}, where('start') == date)
+        return r, status  # return tuple list of doc_ids, new status 'act' or 'ina'
+
     def get_settings(self):
         settings = self.db.table('settings', cache_size=0)
         return settings.all()
@@ -56,10 +67,16 @@ class RainDB(Singleton):
 if __name__ == "__main__":
     rdb = RainDB()
     jobs = rdb.get_jobs()
-    print(jobs)
+    # print(jobs)
+    for job in jobs:
+        print(job)
     s = rdb.get_settings() # return a list of dicts
     print(s)
     v = rdb.get_setting_val('manual_delay')
     print(v)
+
+    r, s = rdb.toggle_status('2020-05-26T08:00:00')
+    print( (r, s) )
+
     rdb.close()
 
