@@ -63,7 +63,7 @@ class Controller(Singleton):
 
     def auto_off_hdl(self):
         # enter MAN_STATE -- is called every minute if we have jobs, but these
-        # jobs are inactive.  If we have no jobs, this function is not called.
+        # jobs are not intime.  If we have no jobs, this function is not called.
         if self.state == AUTO_STATE:
             # AUTO_STATE -> MAN_STATE
             self.logger.info("controller AUTO -> MAN")

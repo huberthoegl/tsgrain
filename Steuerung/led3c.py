@@ -45,3 +45,15 @@ def set_led(color=GREEN):
             mcp23017.status_led(True, True, True) 
 
 
+if __name__ == "__main__":
+    import time
+    mcp23017.init()
+    init()
+    print(logger)
+    while True:
+        set_led(color=RED)
+        time.sleep(1)
+        set_led(color=GREEN)
+        time.sleep(1)
+        set_led(color=BLUE)
+        time.sleep(1)
