@@ -41,12 +41,12 @@ class RainDB(Singleton):
         jobs = self.db.table('jobs', cache_size=0)
         lod = jobs.search(where('start') == date) 
         status = lod[0]['status']
-        if status == "act":
-            status = "ina"
+        if status == "active":
+            status = "inactive"
         else:
-            status = "act"
+            status = "active"
         r = jobs.update({"status": status}, where('start') == date)
-        return r, status  # return tuple list of doc_ids, new status 'act' or 'ina'
+        return r, status  # return tuple list of doc_ids, new status 'active' or 'inactive'
 
     def get_settings(self):
         settings = self.db.table('settings', cache_size=0)

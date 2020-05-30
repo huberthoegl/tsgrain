@@ -4,9 +4,7 @@ from wtforms.validators import DataRequired
 
 
 class SettingsForm(FlaskForm):
-    # Anzahl_Tennisplätze = StringField('Anzahl Tennisplätze')
-    max_zeit_manuell = StringField('Maximale Manuelle Beregnungsdauer')
-    # max_zeit_auto_aus = StringField('Maximale Dauer beim Deaktivieren der Automatik')
+    dauer_manuell = StringField('Manuelle Beregnungsdauer')
     submit = SubmitField('OK')
 
 class SetDateTimeForm(FlaskForm):

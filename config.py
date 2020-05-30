@@ -1,9 +1,9 @@
 
-USER = '~pi'
-# USER = '~hhoegl'
+# USER = '~pi'
+USER = '~hhoegl'
 
-PLATFORM = 'rpi'
-# PLATFORM = 'pc'  # 'pc', 'rpi'
+# PLATFORM = 'rpi'
+PLATFORM = 'pc'  # 'pc', 'rpi'
 
 import os
 homedir = os.path.expanduser(USER)
@@ -11,9 +11,6 @@ homedir = os.path.expanduser(USER)
 IPC_FLAG = True
 
 NCOURTS = 7
-
-# is now red from database
-# MAN_DURATION_SEC = 10  # manual rain duration
 
 TSGRAIN_LOGGER = "TSGRain-Logger"
 

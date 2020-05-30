@@ -14,6 +14,7 @@ if config.PLATFORM == 'pc':
    import pbutton_pc as pbutton
 else:
    import pbutton_rpi as pbutton
+   import rtc
 
 
 PORT = 50000
@@ -52,6 +53,7 @@ def worker():
             # '{ "cmd": "toggle-status", "date": "2020-05-17T22:10:00" }'
             # '{ "cmd": "get-settings" }'
             # '{ "cmd": "set-settings", <settings> }'
+            # '{ "cmd": "set-datetime", "date": ..., "time": ... }'
 
             D = json.loads(msg)
             logger.info("received ipc msg: {}".format(D))
@@ -100,6 +102,13 @@ def worker():
             if D['cmd'] == 'set-settings':
                n = D['manual_delay']['val']
                rdb.set_manual_delay(n)
+               queue_s_to_c.put("ok")  
+            if D['cmd'] == 'set-datetime':
+               if config.PLATFORM == 'rpi':
+                   # XXX to do: must be rewritten
+                   # rtc.RTCChangeDate(D['date'])
+                   # rtc.RTCChangeTime(D['time'])
+                   pass
                queue_s_to_c.put("ok")  
 
         except:

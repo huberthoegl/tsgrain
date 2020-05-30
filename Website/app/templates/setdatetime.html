@@ -4,13 +4,13 @@
     <div class="w3-panel w3-bar w3-light-grey">
         <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
         <a href="{{ url_for('index') }}" class="w3-bar-item w3-button">Manuell</a>
-        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
-        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
+        <a href="{{ url_for('newjob') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
+        <a href="{{ url_for('jobs') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
         <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button w3-red">Einstellungen</a>
     </div>
     <div class="w3-panel w3-bar w3-light-grey">
         <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
-        <a href="{{ url_for('setdatetime') }}" class="w3-bar-item w3-button w3-red">Datum Uhrzeit</a>
+        <a href="{{ url_for('setdatetime') }}" class="w3-bar-item w3-button w3-red">Datum/Uhrzeit</a>
     </div>
 {% endblock %}
 {% block content %}
@@ -18,8 +18,7 @@
     <form action="" method="post" novalidate> 
         {{ form_setdatetime.hidden_tag() }}
         <div class="w3-panel w3-padding-small"> 
-        <h1 title="Hier kann man Datum und Uhrzeit ändern">
-        Einstellungen</h1>
+        <!-- <h1 title="Hier kann man Datum und Uhrzeit ändern"></h1> -->
         </div>
 
         <div class="w3-container w3-border w3-padding w3-round w3-margin">

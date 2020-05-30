@@ -20,13 +20,13 @@ class CourtTimeslot:
 
     def check(self, dt):
         '''dt is a datetime object'''
-        if self.jobdict['cycle'] == '0':
+        if self.jobdict['cycle'] == 'no':
             # one-time rain cycle
             if self.starttime <= dt < self.endtime:
                 return True
             else:
                 return False
-        elif self.jobdict['cycle'] == '24':
+        elif self.jobdict['cycle'] == 'daily':
             # repeat every day
             # if dt is >= than starttime, shift it days_delta days backward
             if dt >= self.starttime:
@@ -52,7 +52,7 @@ class Sequence:
         self.jobdict = D
         self.startstr = self.jobdict['start']
         dt = datetime.fromisoformat(self.startstr)
-        delta = timedelta(seconds=int(D['duration']) * 60)
+        delta = timedelta(seconds=D['duration'] * 60)
         self.cts_list = []
         for i in range(config.NCOURTS):
             if D['courts'][i] == '*':
@@ -66,7 +66,7 @@ class Sequence:
         '''check if time dt is somewhere in the timeslot list. If true,
         return the court number (0...6). If not, return None.
 
-        A daily job (cycle='24') is intime every day after the start date
+        A daily job (cycle='daily') is intime every day after the start date
         has approached.
 
         dt should not match the endtime. If it matches the endtime and 
@@ -97,7 +97,7 @@ class Sequence:
             now = datetime.fromtimestamp(time.time())
         else:
             now = otherdate
-        if now >= self.cts_list[-1].endtime and self.jobdict['cycle'] == '0':
+        if now >= self.cts_list[-1].endtime and self.jobdict['cycle'] == 'no':
             return True
         else:
             return False
@@ -154,8 +154,8 @@ class AutoCtrl(Singleton):
 
     
 if __name__ == "__main__":
-    adict = {'status': 'act', 'start': '2020-05-26T23:30:00', 'duration': '30', 
-             'courts': '*******', 'cycle': '0'} 
+    adict = {'status': 'act', 'start': '2020-05-26T23:30:00', 'duration': 30, 
+             'courts': '*******', 'cycle': 'no'} 
 
     s = Sequence(adict)
     s.print()

@@ -95,8 +95,8 @@ def manuell():
                            status_form=status_form, bits=bits)
 
 
-@app.route('/auto', methods=['GET', 'POST'])
-def auto():
+@app.route('/newjob', methods=['GET', 'POST'])
+def newjob():
     form_input = InputForm()
     if form_input.validate_on_submit():
         #print("===2===")
@@ -140,13 +140,14 @@ def auto():
             else:
                 crts = crts + "."
 
-            # all job entries are strings!
-            js = json.dumps({"status": "act", 
-                             "start": dtstr, "duration": form_input.time_dauer.data, 
-                             "courts": crts, "cycle": form_input.zyklus_zeit.data})
+            js = json.dumps({"status": "active", 
+                             "start": dtstr, 
+                             "duration": int(form_input.time_dauer.data), 
+                             "courts": crts, 
+                             "cycle": form_input.zyklus_zeit.data})
 
             msg = '{"cmd": "store-job", "job": ' + js + '}'
-            logger.info('routes.py auto/: {}'.format(msg))
+            logger.info('routes.py newjob/: {}'.format(msg))
 
             if config.IPC_FLAG: 
                 queue_c_to_s.put(msg)
@@ -154,15 +155,14 @@ def auto():
 
         else:
             flash("Der Auftrag existiert bereits")
-        return redirect(url_for('ausgabe'))
+        return redirect(url_for('jobs'))
 
     #print("===1===")
-    return render_template('auto.html', title='Auto', form_input=form_input)
+    return render_template('newjob.html', title='Neuer Job', form_input=form_input)
 
 
-# Ausgabe der Jobs
-@app.route('/ausgabe', methods=['GET', 'POST'])
-def ausgabe():
+@app.route('/jobs', methods=['GET', 'POST'])
+def jobs():
 
     # Get an unsorted list of jobs
     if config.IPC_FLAG: 
@@ -174,7 +174,7 @@ def ausgabe():
         t = termin.Termin()
         t.status = job["status"]
         t.datumuhrzeit_start = job["start"] 
-        t.time_dauer = job["duration"] 
+        t.time_dauer = job["duration"]  # int
         if job["courts"][0] == '*': 
             t.platz_1 = True 
         else: 
@@ -203,9 +203,9 @@ def ausgabe():
             t.platz_7 = True 
         else: 
             t.platz_7 = False
-        t.zyklus = job["cycle"]   # "0": no cycle, "24": daily 
+        t.zyklus = job["cycle"]   # "no" or "daily"
         termine.append(t)
-    return render_template('ausgabe.html', title='Aufträge', termine=termine)
+    return render_template('jobs.html', title='Aufträge', termine=termine)
 
 
 
@@ -216,7 +216,7 @@ def jobstatus():
         msg = '{"cmd": "toggle-status", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
         queue_c_to_s.put(msg)
         r = queue_s_to_c.get() 
-    return redirect(url_for('ausgabe'))
+    return redirect(url_for('jobs'))
 
 
 
@@ -227,12 +227,12 @@ def delete():
         msg = '{"cmd": "delete-job-by-date", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
         queue_c_to_s.put(msg)
         result = queue_s_to_c.get() 
-    return redirect(url_for('ausgabe'))
+    return redirect(url_for('jobs'))
 
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    form_setting = SettingsForm()
+    sfo = SettingsForm()
 
     class Einstellungen:
         pass
@@ -244,16 +244,14 @@ def settings():
         logger.info("/settings: {}".format(msg))
 
     einstellungen = Einstellungen()
-    einstellungen.max_zeit_manuell = result[1]['val']
+    einstellungen.dauer_manuell = result[1]['val']  # int!
 
-    if form_setting.validate_on_submit():
-        if isNotBlank(form_setting.max_zeit_manuell.data):
-            einstellungen.max_zeit_manuell = form_setting.max_zeit_manuell.data
-        # if isNotBlank(form_setting.Anzahl_Tennisplätze.data):
-        #   einstellung.Anzahl_Tennisplätze = form_setting.Anzahl_Tennisplätze.data
+    if sfo.validate_on_submit():
+        if isNotBlank(sfo.dauer_manuell.data):
+            einstellungen.dauer_manuell = int(sfo.dauer_manuell.data)
 
         if config.IPC_FLAG: 
-            D = {'type': 'manual_delay', 'val': form_setting.max_zeit_manuell.data}
+            D = {'type': 'manual_delay', 'val': int(sfo.dauer_manuell.data)}
             msg = json.dumps({"cmd": "set-settings", "manual_delay": D})
             logger.info("{}".format(msg))
             queue_c_to_s.put(msg)
@@ -263,7 +261,7 @@ def settings():
 
     return render_template('settings.html',  
                            title='Einstellungen', 
-                           form_setting=form_setting, 
+                           sfo=sfo, 
                            einstellungen=einstellungen)
 
 
@@ -274,17 +272,27 @@ def setdatetime():
 
     if form_setdatetime.validate_on_submit():
         if isNotBlank(form_setdatetime.date_new.data):
-            RTCChangeDate(form_setdatetime.date_new.data)
+            # date is set in Steuerung/rtc.py
+            pass
         if isNotBlank(form_setdatetime.time_new.data):
-            RTCChangeTime(form_setdatetime.time_new.data)
-        # XXX todo: set new system time here
+            # time is set in Steuerung/rtc.py
+            pass
+
+        if config.IPC_FLAG: 
+            msg = json.dumps({"cmd": "set-datetime", 
+                              "date": form_setdatetime.date_new.data,
+                              "time": form_setdatetime.time_new.data})
+            logger.info("{}".format(msg))
+            queue_c_to_s.put(msg)
+            result = queue_s_to_c.get() # ok 
+
         return redirect(url_for('setdatetime'))
 
-    # aktuelle Systemzeit abfragen
     import time 
     datum = time.strftime("%Y-%m-%d", time.localtime(time.time()))
     uhrzeit = time.strftime("%H:%M:%S", time.localtime(time.time()))
-    return render_template('setdatetime.html', title='Einstellungen', form_setdatetime=form_setdatetime, uhrzeit=uhrzeit, datum=datum)
+    return render_template('setdatetime.html', title='Einstellungen', 
+           form_setdatetime=form_setdatetime, uhrzeit=uhrzeit, datum=datum)
 
 
 
@@ -301,17 +309,23 @@ def format_platz(value):
         return '-'
 
 def format_zyklus(value):
-    if value == "0":
+    if value == "no":
         return 'einmalig'
-    elif value == "24":
+    elif value == "daily":
         return 'täglich'
     else:
         return 'unbekannt'
 
+def format_status(value):
+    if value == "active":
+        return 'Aktiv'
+    elif value == "inactive":
+        return 'Inaktiv'
 
 app.jinja_env.filters['datetime'] = format_datetime
 app.jinja_env.filters['platz'] = format_platz
 app.jinja_env.filters['zyklus'] = format_zyklus
+app.jinja_env.filters['status'] = format_status
 
 
 # Funktion um leere strings zu überprüfen

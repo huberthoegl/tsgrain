@@ -6,8 +6,8 @@
     <div class="w3-panel w3-bar w3-light-grey">
         <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
         <a href="{{ url_for('index') }}" class="w3-bar-item w3-button">Manuell</a>
-        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button w3-red">Neuer Auftrag</a>
-        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
+        <a href="{{ url_for('newjob') }}" class="w3-bar-item w3-button w3-red">Neuer Auftrag</a>
+        <a href="{{ url_for('jobs') }}" class="w3-bar-item w3-button">Bestehende Aufträge</a>
         <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
     </div>
 {% endblock %}
@@ -16,7 +16,7 @@
     <form action="" method="post" novalidate>
         {{ form_input.hidden_tag() }}
         <div class="w3-panel w3-padding-small"> 
-        <h1 title="Hier kann man zukünftige Beregnungen vorausplanen. Hierfür die Start- und Endzeit eingeben sowie die gewünschten Tennisplätze auswählen">
+        <h1 title="Hier kann man Beregnungen vorausplanen. Die Start- und Endzeit eingeben sowie die gewünschten Tennisplätze auswählen">
         Neuen Beregnungsauftrag hinzufügen</h2>
         </div>
         <div class="w3-panel w3-border w3-round w3-margin w3-padding-small">
@@ -40,13 +40,18 @@
             </div>
             <!-- Beregnungszeit-Eingabe -->  
             <div class="w3-third">
-                <label>Dauer Beregnung pro Platz</label>
+                <label>Dauer pro Platz [Min]</label>
                 <input class="w3-input w3-border w3-hover-light-grey" type="number" name="time_dauer" style="width:40%" min="1" max="60">
                 {% for error in form_input.time_dauer.errors %}
                 <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}
             </div>
         </div>
+
+        <p>
+
+        <label>Auswahl Plätze</label>
+
         <!-- Untere Zeile mit Button 1-7-->
         <div class="w3-row-padding w3-margin">
             <div class="w3-quarter">
@@ -78,21 +83,23 @@
                 <label>Platz 7</label>
             </div>
         </div>
+
+        <p>
+
+        <label>Auswahl Zyklus</label>
+
         <div class="w3-row-padding">
             <!-- Zyklus -->
             <div class="w3-half">
-                <label>Zyklus erstellen</label>
                 <select class="w3-select w3-border" name="zyklus_zeit">
-                    <option value="0" selected>Keine Wiederholung</option>
-                    <option value="24">Wiederholung täglich</option>
-                    <!--
-                    <option value="0,5">Wiederholung alle 12h</option>
-                    <option value="2">Wiederholung alle 2 Tage</option>
-                    <option value="7">Wiederholung wöchentlich</option>
-                    -->
+                    <option value="no" selected>Keine Wiederholung</option>
+                    <option value="daily">Tägliche Wiederholung</option>
                 </select>
             </div>
         </div>
+
+        <p>
+
         <!-- Submit -->
         <div>
             <input type="submit" class="btn" name=submit value="Absenden">

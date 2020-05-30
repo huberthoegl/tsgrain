@@ -6,21 +6,21 @@
     <div class="w3-panel w3-bar w3-light-grey">
         <h1>Beregnungsanlage TSG Stadtbergen 1982</h1>
         <a href="{{ url_for('index') }}" class="w3-bar-item w3-button">Manuell</a>
-        <a href="{{ url_for('auto') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
-        <a href="{{ url_for('ausgabe') }}" class="w3-bar-item w3-button w3-red">Bestehende Aufträge</a>
+        <a href="{{ url_for('newjob') }}" class="w3-bar-item w3-button">Neuer Auftrag</a>
+        <a href="{{ url_for('jobs') }}" class="w3-bar-item w3-button w3-red">Bestehende Aufträge</a>
         <a href="{{ url_for('settings') }}" class="w3-bar-item w3-button">Einstellungen</a>
     </div>
 {% endblock %}
 {% block content %}
 <div class="w3-row-padding w3-margin">
-   <h1>Termine</h1>
+   <h1>Beregnungs-Jobs</h1>
         <div class="w3-responsive">
         <table class="w3-table-all w3-hoverable sortable">
         <thead>
         <tr class="w3-dark-grey">
             <th class="w3-center">Status</th>
-            <th class="w3-center">Start der Beregnung</th>
-            <th class="w3-center">Dauer</th>
+            <th class="w3-center">Start</th>
+            <th class="w3-center">Dauer [Min]</th>
             <th class="w3-center">Wiederholung</th>
             <th class="w3-center">1</th>
             <th class="w3-center">2</th>
@@ -37,7 +37,7 @@
             {% for termin in termine %}
             <tr>
             <td class="w3-center">
-                {{termin.status}}
+                {{termin.status|status}}
             </td>
             <td>
                 {{termin.datumuhrzeit_start|datetime }}
@@ -49,25 +49,25 @@
                 {{termin.zyklus|zyklus}}
             </td>
             <td class="w3-center">
-                {{termin.platz_1|platz }}
+                {{termin.platz_1|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_2|platz }}
+                {{termin.platz_2|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_3|platz }}
+                {{termin.platz_3|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_4|platz }}
+                {{termin.platz_4|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_5|platz }}
+                {{termin.platz_5|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_6|platz }}
+                {{termin.platz_6|platz}}
             </td>
             <td class="w3-center">
-                {{termin.platz_7|platz }}
+                {{termin.platz_7|platz}}
             </td>
             <td class="w3-center">
                 <form method="POST" action="/flipstatus">
