@@ -1,2 +1,4 @@
 - Rewrite rtc.py, RTCChangeDate(), RTCChangeTime(). Time is now set with 
   "sudo hwclock -w". See howto/I2C.txt.
+- Status LED
+- "Auto-OFF" button
