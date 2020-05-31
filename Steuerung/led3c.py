@@ -13,6 +13,8 @@ GREEN = 'green'
 BLUE = 'blue'
 WHITE = 'white'
 YELLOW = 'yellow'
+TUERKIS = 'tuerkis'
+VIOLET = 'violet'
 
 
 logger = None
@@ -37,6 +39,12 @@ def set_led(color=GREEN):
     if color == BLUE:
         if config.PLATFORM == 'rpi':
             mcp23017.status_led(False, False, True) 
+    if color == TUERKIS:
+        if config.PLATFORM == 'rpi':
+            mcp23017.status_led(False, True, True) 
+    if color == VIOLET:
+        if config.PLATFORM == 'rpi':
+            mcp23017.status_led(True, False, True) 
     if color == YELLOW:
         if config.PLATFORM == 'rpi':
             mcp23017.status_led(True, True, False) 
