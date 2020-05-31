@@ -83,7 +83,7 @@ class Sequence:
 
     def is_active(self):
         '''check if the status of the job is active'''
-        if self.jobdict['status'] == 'act':
+        if self.jobdict['status'] == 'active':
             return True
         else:
             return False
@@ -154,8 +154,8 @@ class AutoCtrl(Singleton):
 
     
 if __name__ == "__main__":
-    adict = {'status': 'act', 'start': '2020-05-26T23:30:00', 'duration': 30, 
-             'courts': '*******', 'cycle': 'no'} 
+    adict = {'status': 'active', 'start': '2020-05-26T23:30:00', 
+             'duration': 30, 'courts': '*******', 'cycle': 'no'} 
 
     s = Sequence(adict)
     s.print()
