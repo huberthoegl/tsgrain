@@ -6,6 +6,9 @@ import controller
 import time
 import logging
 import mpipc_srv
+import led3c
+import db
+
 
 # https://docs.python.org/3/howto/logging-cookbook.html
 # levels: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -25,7 +28,7 @@ logger.addHandler(ch)
 
 
 def quit():
-    pass 
+    led3c.set_led(led3c.OFF)
 
 
 def main():
@@ -33,6 +36,8 @@ def main():
     logger.info("starting main")
     atexit.register(quit)
     mpipc_srv.start_ipc_server()
+    rdb = db.RainDB()
+    rdb.inc_startcount()
     co = controller.Controller()
     co.run()
 

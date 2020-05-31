@@ -5,6 +5,7 @@ import subprocess, time, sys, os
 import config
 import logging
 import RPi.GPIO as GPIO
+import led3c
 
 logger = logging.getLogger(config.TSGRAIN_LOGGER)
 
@@ -21,11 +22,13 @@ duration = 0
 
 
 def handler(pin):
+  '''see gpio.py'''
+
   global duration
 
   if not (GPIO.input(pin)):
     # Taste gedrueckt
-    # XXX todo Status LED wechseln
+    led3c.set_led(color=led3c.WHITE)
     if duration == 0:
       duration = time.time()
   else:
@@ -34,10 +37,12 @@ def handler(pin):
       elapsed = (time.time() - duration)
       duration = 0
       if elapsed >= 3:  # laenger als 3 Sekunden 
-        logger.info("shutdown -h now")
+        led3c.set_led(color=led3c.BLUE)
+        logger.info("shutdown -h now (elapsed={})".format(elapsed))
         subprocess.call(['shutdown', '-h', 'now'], shell=False) 
       elif elapsed >= 0.1: # Entprellzeit
         # 0.1 bis < 3 sek
-        logger.info("shutdown -r now")
+        led3c.set_led(color=led3c.YELLOW)
+        logger.info("shutdown -r now (elapsed={})".format(elapsed))
         subprocess.call(['shutdown', '-r', 'now'], shell=False) 
 

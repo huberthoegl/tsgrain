@@ -59,6 +59,12 @@ class RainDB(Singleton):
     def set_manual_delay(self, n):
         settings = self.db.table('settings', cache_size=0)
         return settings.update({'val': n}, q.type == 'manual_delay')
+
+    def inc_startcount(self):
+        settings = self.db.table('settings', cache_size=0)
+        n = settings.search(q.type == 'startcnt')[0]['val']
+        n = n + 1
+        return settings.update({'val': n}, q.type == 'startcnt')
     
     def close(self):
         self.db.close() 
