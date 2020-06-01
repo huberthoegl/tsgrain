@@ -50,7 +50,7 @@ def worker():
             # '{ "cmd": "store-job", "job": { ...job...} }'
             # '{ "cmd": "get-jobs" }'
             # '{ "cmd": "delete-job-by-date", "date": "2020-05-17T22:10:00" }'
-            # '{ "cmd": "toggle-status", "date": "2020-05-17T22:10:00" }'
+            # '{ "cmd": "toggle-status-by-date", "date": "2020-05-17T22:10:00" }'
             # '{ "cmd": "get-settings" }'
             # '{ "cmd": "set-settings", <settings> }'
             # '{ "cmd": "set-datetime", "date": ..., "time": ... }'
@@ -90,10 +90,14 @@ def worker():
                r = rdb.delete_job_by_date(date)
                logger.info("ipc reply: {}".format(r))
                queue_s_to_c.put(r)  # return list of deleted doc_ids
-            if D['cmd'] == 'toggle-status':
+            if D['cmd'] == 'toggle-status-by-date':
                date = D['date']
                r, s = rdb.toggle_status(date)
                logger.info("ipc reply: r={} s={}".format(r, s))
+               if s == 'inactive':
+                   # XXX future extension: if job is running, _immediately_ stop it. Currently 
+                   # we need to wait at max 1 minute until active job terminates.
+                   pass
                queue_s_to_c.put(r)  # return list of toggled doc_ids
             if D['cmd'] == 'get-settings':
                r = rdb.get_settings()

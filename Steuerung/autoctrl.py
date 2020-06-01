@@ -139,6 +139,10 @@ class AutoCtrl(Singleton):
                         self.logger.info("controller: sequence over")
                     self.current = None
                     self.auto_off_hdl()
+            else:
+                # job is inactive
+                self.current = None
+                self.auto_off_hdl()
 
         # delete outdated jobs (only delete jobs which run only one time!)
         for s in self.seqlist:

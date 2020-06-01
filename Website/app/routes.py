@@ -213,7 +213,7 @@ def jobs():
 def jobstatus():
     datumuhrzeit_start = request.form.get('uhrzeit')
     if config.IPC_FLAG: 
-        msg = '{"cmd": "toggle-status", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
+        msg = '{"cmd": "toggle-status-by-date", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
         queue_c_to_s.put(msg)
         r = queue_s_to_c.get() 
     return redirect(url_for('jobs'))
