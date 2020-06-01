@@ -37,12 +37,12 @@ def handler(pin):
       elapsed = (time.time() - duration)
       duration = 0
       if elapsed >= 3:  # laenger als 3 Sekunden 
-        led3c.set_led(color=led3c.BLUE)
+        led3c.set_led(color=led3c.VIOLET)
         logger.info("shutdown -h now (elapsed={})".format(elapsed))
         subprocess.call(['shutdown', '-h', 'now'], shell=False) 
       elif elapsed >= 0.1: # Entprellzeit
         # 0.1 bis < 3 sek
-        led3c.set_led(color=led3c.YELLOW)
+        led3c.set_led(color=led3c.BLUE)
         logger.info("shutdown -r now (elapsed={})".format(elapsed))
         subprocess.call(['shutdown', '-r', 'now'], shell=False) 
 
