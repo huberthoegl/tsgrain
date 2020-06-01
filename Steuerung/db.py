@@ -28,6 +28,13 @@ class RainDB(Singleton):
                 return True
         return False
 
+    def job_is_active(self, date):
+        jobs = self.get_jobs()
+        for job in jobs:
+            if job['start'] == date and job['status'] == 'active':
+                return True
+        return False
+
     def get_jobs(self):
         jobs = self.db.table('jobs', cache_size=0)
         return jobs.all()  # list of dicts

@@ -18,6 +18,7 @@ VIOLET = 'violet'
 
 
 logger = None
+currentcolor = None
 
 
 def init():
@@ -26,6 +27,8 @@ def init():
 
 
 def set_led(color=GREEN):
+    global currentcolor
+    currentcolor = color
     logger.info("led3c set_led {}".format(color))
     if color == OFF:
         if config.PLATFORM == 'rpi':
@@ -51,6 +54,11 @@ def set_led(color=GREEN):
     if color == WHITE:
         if config.PLATFORM == 'rpi':
             mcp23017.status_led(True, True, True) 
+
+
+def get_led():
+    return currentcolor
+
 
 
 if __name__ == "__main__":

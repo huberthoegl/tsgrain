@@ -43,6 +43,7 @@ class Controller(Singleton):
         self.pb = pbutton.PButtons()
         self.pb.subscribe(self.mc.pb_pressed)
         self.ac = autoctrl.AutoCtrl()
+        self.pb.subscribe(self.ac.autooff_btn_callback)
         self.ac.register_auto_on_hdl(self.auto_on_hdl)
         self.ac.register_auto_off_hdl(self.auto_off_hdl)
         self.logger.info("Controller instance created")
@@ -53,7 +54,7 @@ class Controller(Singleton):
         if self.state == MAN_STATE:
             # MAN_STATE -> AUTO_STATE
             self.logger.info("controller MAN -> AUTO")
-            led3c.set_led(led3c.RED)
+        led3c.set_led(led3c.RED)
         self.state = AUTO_STATE
         # Only this one on, all others off. Note that the last output in 
         # a sequence is not actively switched off.  It is cleared by 

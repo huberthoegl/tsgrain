@@ -14,8 +14,8 @@ from singleton import Singleton
 import db
 
 
-MC_ACTIVE = 'MC_KEY'   # manual control active
-MC_INACTIVE = 'MC_INACTIVE' # ... inactive 
+MC_ACTIVE = 'MC_ACTIVE'   # manual control active
+MC_INACTIVE = 'MC_INACTIVE' # manual control inactive 
 
 
 class ManCtrl(Singleton):
@@ -30,11 +30,9 @@ class ManCtrl(Singleton):
         self.db = db.RainDB()
 
     def pb_pressed(self, key):
-        '''Pushbutton PB1-PB7 and PBAutoOff press events. 
+        '''Pushbutton PB1-PB7 press events. The PBAutoOff button is ignored for 
+           manual control. 
         '''
-        if key == pbutton.PBAutoOff:
-            # XXX do something
-            return
 
         if key not in pbutton.MAN_KEYS or self.disabled:
             self.state = MC_INACTIVE

@@ -4,9 +4,16 @@ from datetime import datetime
 from datetime import timedelta
 from singleton import Singleton
 import db
+import manctrl
 import config
 import clock1m
 import logging
+import led3c
+if config.PLATFORM == 'pc':
+    import pbutton_pc as pbutton
+else:  # PLATFORM == 'rpi'
+    import pbutton_rpi as pbutton
+
 
 
 class CourtTimeslot:
@@ -115,6 +122,49 @@ class AutoCtrl(Singleton):
         self.rdb = db.RainDB() # singleton
         self.logger.info("starting 1 min periodic callback handler")
         self.current = None
+        self.mc = manctrl.ManCtrl()
+        self._autooff_startstr = None
+
+    def autooff_btn_callback(self, key):
+        '''If the PBAutoOff button is pressed, a running job is changed to status 'inactive'.  
+        The job is _not_ made again active when the button is pressed a second time.
+        '''
+        if key == pbutton.PBAutoOff:
+            if self.auto_court in (0, 1, 2, 3, 4, 5, 6):
+                # we have a running job
+                date = self._s.startstr
+                self._autooff_startstr = date
+                r, s = self.rdb.toggle_status(date)
+                self.logger.info("autooff_btn_callback: setting job status {}".format(s))
+                if s == 'inactive':
+                    for i in range(4):
+                        led3c.set_led(led3c.RED)
+                        time.sleep(0.5)
+                        led3c.set_led(led3c.OFF)
+                        time.sleep(0.5)
+                    led3c.set_led(led3c.GREEN)
+                    self.mc.enable()  # clear outputs, enable manual control
+                    self.auto_court = None
+            else:
+                # XXX this works only when RPi has not been rebootet. Maybe 
+                # a better solution would be to write the autooff job to the db
+                if self._autooff_startstr:
+                    if self.rdb.date_exists(self._autooff_startstr) and \
+                       not self.rdb.job_is_active(self._autooff_startstr):
+                        # job exists and is not active
+                        r, s = self.rdb.toggle_status(self._autooff_startstr)
+                        self.logger.info("autooff_btn_callback: should be active: {}".format(s))
+                        color = led3c.get_led()
+                        for i in range(4):
+                            led3c.set_led(color)
+                            time.sleep(0.5)
+                            led3c.set_led(led3c.OFF)
+                            time.sleep(0.5)
+                        led3c.set_led(color)
+                    self._autooff_startstr = None
+        else:
+            # ignore all other buttons
+            return  
 
     def min1cb(self):
         # callback every minute constructs an up-to-date sequence list
@@ -124,9 +174,9 @@ class AutoCtrl(Singleton):
            self.seqlist.append(Sequence(job))
 
         now = datetime.fromtimestamp(time.time())
-        for s in self.seqlist:
-            if s.is_active():
-                self.auto_court = s.is_intime(now)
+        for self._s in self.seqlist:
+            if self._s.is_active():
+                self.auto_court = self._s.is_intime(now)
                 if self.auto_court in (0, 1, 2, 3, 4, 5, 6):
                     # switch controller state to "automatic" (disables manual ctrl)
                     if self.current != self.auto_court:  # edge-detect

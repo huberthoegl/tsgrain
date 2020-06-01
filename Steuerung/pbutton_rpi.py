@@ -91,6 +91,8 @@ class PButtons:
         self.panelkey = None
 
     def subscribe(self, cb):
+        # XXX future extension: it should be possible to subscribe only 
+        # a single button, e.g. PBAutoOff
         self.cblist.append(cb)
 
     def unsubscribe(self, cb):

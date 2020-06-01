@@ -9,6 +9,7 @@ import config
 import manctrl
 import json
 import db
+import led3c
 
 if config.PLATFORM == 'pc':
    import pbutton_pc as pbutton
@@ -25,6 +26,7 @@ bmg = None
 running = True
 logger = logging.getLogger(config.TSGRAIN_LOGGER)
 rdb = db.RainDB() # singleton
+manual_control = None
 
 
 def worker():
@@ -57,6 +59,7 @@ def worker():
 
             D = json.loads(msg)
             logger.info("received ipc msg: {}".format(D))
+
             if D['cmd'] == 'press-button':
                n = D['n']
                key = pbutton.MAN_KEYS[n]
@@ -65,48 +68,59 @@ def worker():
                logger.info("ipc reply: {}".format(reply))
                queue_s_to_c.put(reply)
                time.sleep(0.1)
+
             if D['cmd'] == 'get-outputs':
                outputs = manual_control.out.get()
                logger.info("ipc reply: {}".format(outputs))
                queue_s_to_c.put(outputs)
+
             if D['cmd'] == 'date-exists':
                date = D['date']
                r = rdb.date_exists(date)
                logger.info("ipc reply: {}".format(r))
                queue_s_to_c.put(r)  # send True or False
+
             if D['cmd'] == 'store-job':
                job = D['job']
                rdb.store_job(job)
                reply = 'ok'
                logger.info("ipc reply: {}".format(reply))
                queue_s_to_c.put(reply)
+
             if D['cmd'] == 'get-jobs':
                jobs = rdb.get_jobs()
                # jobs is a LoD
                logger.info("ipc reply: {}".format("jobs as LoD..."))
                queue_s_to_c.put(jobs)
+
             if D['cmd'] == 'delete-job-by-date':
                date = D['date']
                r = rdb.delete_job_by_date(date)
                logger.info("ipc reply: {}".format(r))
                queue_s_to_c.put(r)  # return list of deleted doc_ids
+               manual_control.enable() 
+               led3c.set_led(led3c.GREEN)
+
             if D['cmd'] == 'toggle-status-by-date':
                date = D['date']
                r, s = rdb.toggle_status(date)
                logger.info("ipc reply: r={} s={}".format(r, s))
                if s == 'inactive':
-                   # XXX future extension: if job is running, _immediately_ stop it. Currently 
-                   # we need to wait at max 1 minute until active job terminates.
-                   pass
+                   # if job is running, immediately stop it. 
+                   manual_control.enable() 
+                   led3c.set_led(led3c.GREEN)
                queue_s_to_c.put(r)  # return list of toggled doc_ids
+
             if D['cmd'] == 'get-settings':
                r = rdb.get_settings()
                logger.info("ipc reply: {}".format(r))
                queue_s_to_c.put(r)  
+
             if D['cmd'] == 'set-settings':
                n = D['manual_delay']['val']
                rdb.set_manual_delay(n)
                queue_s_to_c.put("ok")  
+
             if D['cmd'] == 'set-datetime':
                if config.PLATFORM == 'rpi':
                    # XXX to do: must be rewritten

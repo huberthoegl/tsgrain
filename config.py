@@ -18,7 +18,7 @@ TSGRAIN_LOGGER = "TSGRain-Logger"
 if PLATFORM == 'pc':
     SEC_PER_MIN = 1   # for testing on pc
 else:
-    SEC_PER_MIN = 60  
+    SEC_PER_MIN = 1
 
 DBPATH = os.path.join(homedir, 'tsgrain/Datenbank/db.json')
 LOGFILE = os.path.join(homedir, 'tsgrain/Steuerung/tsgrain.log')

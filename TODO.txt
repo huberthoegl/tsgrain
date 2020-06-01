@@ -2,3 +2,7 @@
   "sudo hwclock -w". See howto/I2C.txt.
 - Status LED
 - "Auto-OFF" button
+- One-minute callback and Sequence object should better be integrated into the tinydb.
+  This is necessary because we also have now async status changes by PBAutoOff.
+- Status-LED should not be managed completely independent from the main objects. The 
+  3-color LED should also be a singleton object.
