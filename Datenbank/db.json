@@ -1,1 +1,1 @@
-{"settings": {"1": {"type": "startcnt", "val": 48}, "2": {"type": "manual_delay", "val": 5}}, "jobs": {"1": {"status": "active", "start": "2020-06-01T13:30:00", "duration": 2, "courts": "*******", "cycle": "daily"}}}
+{"settings": {"1": {"type": "startcnt", "val": 50}, "2": {"type": "manual_delay", "val": 5}}, "jobs": {"1": {"status": "active", "start": "2020-06-01T13:30:00", "duration": 2, "courts": "*******", "cycle": "daily"}}}
