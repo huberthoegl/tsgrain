@@ -114,7 +114,8 @@ def init():
     # bus.write_byte_data(expand_2, INTCONA_2, 0xFF) #1: interrupt auf abweichung von Defval, 0: interrupt auf flanke
     bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: interrupt auf abweichung von Defval, 0: interrupt auf flanke
     iocon = bus.read_byte_data(expand_2, IOCONA_2) #IOCON register bearbeiten
-    bus.write_byte_data(expand_2, IOCONA_2, iocon | 0b01111010)
+    # bus.write_byte_data(expand_2, IOCONA_2, iocon | 0b01111010)
+    bus.write_byte_data(expand_2, IOCONA_2, iocon | 0b00111010)
 
     #Starten des Interrupts durch auslesen GPIO
     Gpio_wert = bus.read_byte_data(expand_2, GPIOA_2) 
