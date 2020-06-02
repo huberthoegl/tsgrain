@@ -29,7 +29,8 @@ def init():
 def set_led(color=GREEN):
     global currentcolor
     currentcolor = color
-    logger.info("led3c set_led {}".format(color))
+    # XXX too much logging for set_led red (auto mode)
+    # logger.info("led3c set_led {}".format(color))
     if color == OFF:
         if config.PLATFORM == 'rpi':
             mcp23017.status_led(False, False, False) 
