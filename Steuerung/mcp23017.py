@@ -13,7 +13,6 @@ bus = smbus.SMBus(1)
 
 logger = logging.getLogger(config.TSGRAIN_LOGGER)
 
-
 press_handler = None
 release_handler = None
 
@@ -32,6 +31,11 @@ def mcp_handler(intr_nr):
     bus.write_byte_data(expand_2, INTCONA_2, 0xFF) # all pins compared against defval
     '''
     # global counter
+
+    # The INTF register reflects the interrupt condition on the
+    # port pins of any pin that is enabled for interrupts via the
+    # GPINTEN register. A set bit indicates that the
+    # associated pin caused the interrupt.
     intfa = bus.read_byte_data(expand_2, INTFA_2)    # first read INTFA, then ...
     bus.write_byte_data(expand_2, GPINTENA_2, 0x00)  # ... disable MCP INTRs (clears INTFA!)
 
@@ -39,6 +43,7 @@ def mcp_handler(intr_nr):
 
     # print("{} {} intfa={:x}".format(counter, presscount, intfa))
 
+    # INTCAP captures the GPIO port value at the time the interrupt occured
     capa = bus.read_byte_data(expand_2, INTCAPA_2)  # clears intr flag
     # print("capa={:x}".format(capa))
     if capa == 0xfe: 
@@ -70,6 +75,8 @@ def mcp_handler(intr_nr):
     n = 0
     while True:
         # wait for button release
+
+        # Read the value on the port GPIOA
         gpa = bus.read_byte_data(expand_2, GPIOA_2)   # clears intr flag
         # print("gpa={:x}".format(gpa))
         if gpa == 0xff: 
@@ -184,46 +191,6 @@ def status_led(r, g, b):
     bus.write_byte_data(expand_2, OLATB_2, wert)
 
 
-def read_interrupt():
-    '''Gibt zurueck, welche Taste gedrueckt wurde (0...7). 
-    '''
-    # The INTF register reflects the interrupt condition on the
-    # port pins of any pin that is enabled for interrupts via the
-    # GPINTEN register. A set bit indicates that the
-    # associated pin caused the interrupt.
-    irwert = bus.read_byte_data(expand_2, INTFA_2)
-    mask = 0x01
-    i = 0
-    while i < 8:
-        if mask & irwert:
-            break
-        else:
-            mask <<= 1
-            i += 1
-    if 0 <= i <= 7:
-        return i
-    else:
-        logger.info("read_interrupt: ungueltige Taste, irwert=0x{:x}".format(irwert))
-        return None
-
-
-def read_tasten():
-    '''Read the value on the port GPIOA.
-    
-    Manual: "The interrupt condition is cleared after the LSB of the data 
-    is clocked out during a read command of GPIO or INTCAP."
-    '''
-    return bus.read_byte_data(expand_2, GPIOA_2) 
-    
-
-def read_intcapa():
-    '''INTCAP captures the GPIO port value at the time the interrupt
-    occured.
-
-    Manual: "The interrupt condition is cleared after the LSB of the 
-    data is clocked out during a read command of GPIO or INTCAP."
-    '''
-    return bus.read_byte_data(expand_2, INTCAPA_2) 
 
 
 def cleanup():
