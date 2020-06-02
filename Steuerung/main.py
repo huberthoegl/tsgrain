@@ -37,9 +37,12 @@ def quit():
 
 
 def sigterm_handler(signum, frame):
-    '''called when program is terminated with systemctl stop ... '''
+    '''called when program is terminated with systemctl stop ...
+    or with shutdown -r now
+    '''
     logger.info("program received SIGTERM (signum={})".format(signum))
-    led3c.set_led(led3c.OFF)
+    # do not switch off status led, it should be blue until reboot ends
+    # led3c.set_led(led3c.OFF)  
     o = output.Output()
     o.all_off()
     import os

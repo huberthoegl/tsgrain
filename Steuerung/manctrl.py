@@ -30,11 +30,14 @@ class ManCtrl(Singleton):
         self.db = db.RainDB()
 
     def pb_pressed(self, key):
-        '''Pushbutton PB1-PB7 press events. The PBAutoOff button is ignored for 
-           manual control. 
+        '''Called on every pushbutton PB1-PB7 and PBAutoOff press events. 
         '''
 
-        if key not in pbutton.MAN_KEYS or self.disabled:
+        if key == pbutton.PBAutoOff:
+            # ignore AutoOff button
+            return
+
+        if self.disabled:
             self.state = MC_INACTIVE
             self.key = None
             return
