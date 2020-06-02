@@ -23,12 +23,14 @@ def mcp_handler(intr_nr):
     key_nr = read_interrupt()  
     if key_nr == None:
         logger.info("mcp_handler: read_interrupt NONE KEY")
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
         return  # key could not be identified
     time.sleep(0.1)
     capa = read_intcapa()
     if capa == 255:
         logger.info("mcp_handler: calling release_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
         release_handler(intr_nr, key_nr)
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
     else:
         logger.info("mcp_handler: calling press_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
         if capa == 0xfe: # P1
@@ -47,6 +49,7 @@ def mcp_handler(intr_nr):
             press_handler(intr_nr, key_nr)
         elif capa == 0x7f: # PBAutoOff
             press_handler(intr_nr, key_nr)
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
 
 
 def add_press_handler(f):
@@ -63,7 +66,7 @@ def add_release_handler(f):
 
 def init():
     global expand_1, expand_2, OLATA_1, OLATB_1, OLATA_2, OLATB_2, INTFA_2, \
-            GPIOA_2, GPINTENA_2, INTCAPA_2
+           GPIOA_2, GPINTENA_2, INTCAPA_2
 
     #Konfiguration I2C
     ##### Erweiterungsboard 1 -- Output-Platine
@@ -76,50 +79,53 @@ def init():
       
     # Definiere GPA/OLATA und GPB/OLATB als Output // 1 für Ausgabe, 
     # 0 für Eingabe
-    bus.write_byte_data(expand_1,IODIRA_1,0x00)
-    bus.write_byte_data(expand_1,IODIRB_1,0x00)
+    bus.write_byte_data(expand_1, IODIRA_1, 0x00)
+    bus.write_byte_data(expand_1, IODIRB_1, 0x00)
      
     # GPA/OLATA und GPB/OLATB default Werte setzen
-    bus.write_byte_data(expand_1,OLATA_1,0x00)
-    bus.write_byte_data(expand_1,OLATB_1,0xFF)
+    bus.write_byte_data(expand_1, OLATA_1, 0x00)
+    bus.write_byte_data(expand_1, OLATB_1, 0xFF)
 
     ##### Erweiterungsboard 2 -- Input-Platine
     expand_2 = 0x23 # i2c Adresse
     IODIRA_2 = 0x00 # Pin Register
     IODIRB_2 = 0x01 # Pin Register
     GPPUA_2 = 0x0C # Register für Pull-Up Widerstände
-    GPIOA_2 = 0x12 # Register fuer GPA Eingabe
-    OLATB_2 = 0x15 # Register fuer GPB Ausgabe
+    GPIOA_2 = 0x12 # Register fuer GPIOA Eingabe
+    OLATB_2 = 0x15 # Register fuer GPIOB Ausgabe
       
     # Definiere GPA und GPB als Input
     # Alle 8 GPA sind als Input und Interrupt eingestellt
-    bus.write_byte_data(expand_2,IODIRA_2,0xFF) 
-    bus.write_byte_data(expand_2,IODIRB_2,0x00)
+    bus.write_byte_data(expand_2, IODIRA_2, 0xFF) 
+    bus.write_byte_data(expand_2, IODIRB_2, 0x00)
 
     # GPB als Output deklariert für Status LED
-    bus.write_byte_data(expand_2,OLATB_2,0x00) 
+    bus.write_byte_data(expand_2, OLATB_2, 0x00) 
 
-    bus.write_byte_data(expand_2,GPPUA_2, 0xFF) 
+    bus.write_byte_data(expand_2, GPPUA_2, 0xFF) 
 
     # Konfiguration für Interrupt Board2-GPB
     IOCONA_2 = 0x0A # Konfigurationsregister für INTPOL
     INTCONA_2 = 0x08 # Interrupt auf Abweichung vom Standartwert festlegen
     DEFVALA_2 = 0x06 # Standartwert des Pins
     GPINTENA_2 = 0x04 # Interrupt für welchen Pin festlegen
-    INTCAPA_2 = 0x10
-    INTFA_2 = 0x0E #Interrupt Flag register
+    INTCAPA_2 = 0x10 # Interrupt Captured Register
+    INTFA_2 = 0x0E # Interrupt Flag register
 
     bus.write_byte_data(expand_2, GPINTENA_2, 0xFF) #pins on interrupt
     bus.write_byte_data(expand_2, DEFVALA_2, 0xFF) #standartwert 1
-    # bus.write_byte_data(expand_2, INTCONA_2, 0xFF) #1: interrupt auf abweichung von Defval, 0: interrupt auf flanke
-    bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: interrupt auf abweichung von Defval, 0: interrupt auf flanke
+    # bus.write_byte_data(expand_2, INTCONA_2, 0xFF) #1: Interrupt auf Abweichung von Defval, 0: interrupt auf flanke
+    bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: Interrupt auf Abweichung von Defval, 0: interrupt auf flanke
 
-    # iocon = bus.read_byte_data(expand_2, IOCONA_2) #IOCON register bearbeiten
-    # iocon = iocon | 0b00111010
-    iocon = 0x3a
+    iocon = bus.read_byte_data(expand_2, IOCONA_2) #IOCON Register bearbeiten
+    iocon = iocon | 0b01111010
+    # Die Steuerung am Tennisheim benoetigt unbedingt, dass beide Interrupts
+    # INTA und INTB gespiegelt werden (iocon = 0x7a; mit iocon = 0x3a 
+    # funktioniert es nicht!
     bus.write_byte_data(expand_2, IOCONA_2, iocon)
 
-    # Starten des Interrupts durch Auslesen GPIO
+    # Starten des Interrupts entweder durch Auslesen GPIO oder durch Auslesen
+    # INTCAP
     Gpio_wert = bus.read_byte_data(expand_2, GPIOA_2) 
 
 
@@ -143,12 +149,16 @@ def status_led(r, g, b):
         wert = wert+4
     if b == True:
         wert = wert+2    
-    bus.write_byte_data(expand_2,OLATB_2,wert)
+    bus.write_byte_data(expand_2, OLATB_2, wert)
 
 
 def read_interrupt():
     '''Gibt zurueck, welche Taste gedrueckt wurde (0...7). 
     '''
+    # The INTF register reflects the interrupt condition on the
+    # port pins of any pin that is enabled for interrupts via the
+    # GPINTEN register. A set bit indicates that the
+    # associated pin caused the interrupt.
     irwert = bus.read_byte_data(expand_2, INTFA_2)
     mask = 0x01
     i = 0
@@ -158,30 +168,30 @@ def read_interrupt():
         else:
             mask <<= 1
             i += 1
-    #print("read_interrupt: irwert={} i={}".format(irwert, i))
     if 0 <= i <= 7:
         return i
     else:
+        logger.info("read_interrupt: ungueltige Taste, irwert=0x{:x}".format(irwert))
         return None
 
 
 def read_tasten():
-    '''Manual: "The interrupt condition is cleared after the LSB of the data is clocked out during
-    a read command of GPIO or INTCAP."
+    '''Read the value on the port GPIOA.
+    
+    Manual: "The interrupt condition is cleared after the LSB of the data 
+    is clocked out during a read command of GPIO or INTCAP."
     '''
     return bus.read_byte_data(expand_2, GPIOA_2) 
     
 
 def read_intcapa():
-    '''Manual: "The interrupt condition is cleared after the LSB of the data is clocked out during
-    a read command of GPIO or INTCAP."
+    '''INTCAP captures the GPIO port value at the time the interrupt
+    occured.
+
+    Manual: "The interrupt condition is cleared after the LSB of the 
+    data is clocked out during a read command of GPIO or INTCAP."
     '''
     return bus.read_byte_data(expand_2, INTCAPA_2) 
-
-
-
-def setDefaultRelaisOutput(): # sofortiges Setzen beim Starten der Steuerung
-    bus.write_byte_data(expand_1, OLATB_1, 0xFF)
 
 
 def cleanup():
