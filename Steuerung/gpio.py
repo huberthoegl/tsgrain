@@ -13,10 +13,7 @@ def init():
     # GPIO.setup(interrupt_clock, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     GPIO.add_event_detect(interrupt_expand, GPIO.RISING, 
-                          callback=mcp_handler, bouncetime=100)
-    #GPIO.add_event_detect(interrupt_clock, GPIO.FALLING, \
-    #   callback=interrupt_routine_clock, bouncetime=10)
-
+                          callback=mcp_handler)
 
     # GPIO22 boot/shutdown button
     shutdown_pin = 22  

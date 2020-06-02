@@ -124,6 +124,7 @@ class AutoCtrl(Singleton):
         self.current = None
         self.mc = manctrl.ManCtrl()
         self._autooff_startstr = None
+        self.auto_court = None
 
     def autooff_btn_callback(self, key):
         '''If the PBAutoOff button is pressed, a running job is changed to status 'inactive'.  

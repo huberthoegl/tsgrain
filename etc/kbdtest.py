@@ -1,99 +1,157 @@
-'''Enable I2C bus with "sudo raspi-config"
-Python package python3-smbus must be installed.
-'''
 
-import smbus
+import RPi.GPIO as GPIO
 import time
-import array
-import math
+import smbus
 import logging
-import config
- 
-bus = smbus.SMBus(1)
 
-logger = logging.getLogger(config.TSGRAIN_LOGGER)
+logger = logging.getLogger("kbd-logger")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh = logging.FileHandler("kbdtest.log")
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+# ch.setLevel(logging.ERROR)
+ch.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
+
+presscount = 0
+counter = 0
+
+PB1 = 'PB1'
+PB2 = 'PB2'
+PB3 = 'PB3'
+PB4 = 'PB4'
+PB5 = 'PB5'
+PB6 = 'PB6'
+PB7 = 'PB7'
+PBAutoOff = 'PBAutoOff'
 
 
-press_handler = None
-release_handler = None
+def press_handler(intnr, keynr):
+    global presscount
+    presscount += 1
+    print("press_handler", keynr)
 
 
-def mcp_handler(intr_nr):
+def release_handler(intnr, keynr):
+    global presscount
+    presscount -= 1
+    print("release_handler", keynr)
+
+
+
+def mcp_handler2(intr_nr):
     '''Interrupt Service Routine fuer I2C Expander 2, PORTA
 
     Diese Variante erzeugt nur einen Interrupt beim Druecken der Taste. Das Loslassen wird
-    durch Polling festgestellt. 
+    durch Polling festgestellt.
 
     GPIO.add_event_detect(17, 
                           GPIO.RISING, 
-                          callback=mcp_handler)   # omitted bouncetime! 
+                          callback=mcp_handler2)   # omitted bouncetime! 
 
     Initialisierung des MCP:
     bus.write_byte_data(expand_2, INTCONA_2, 0xFF) # all pins compared against defval
     '''
-    # global counter
+    global counter
     intfa = bus.read_byte_data(expand_2, INTFA_2)    # first read INTFA, then ...
     bus.write_byte_data(expand_2, GPINTENA_2, 0x00)  # ... disable MCP INTRs (clears INTFA!)
 
     time.sleep(0.1)
 
-    # print("{} {} intfa={:x}".format(counter, presscount, intfa))
+    print("{} {} intfa={:x}".format(counter, presscount, intfa))
 
     capa = bus.read_byte_data(expand_2, INTCAPA_2)  # clears intr flag
     # print("capa={:x}".format(capa))
     if capa == 0xfe: 
-        bt = 0
+        bt = PB1
         press_handler(intr_nr, bt)
     elif capa == 0xfd: 
-        bt = 1
+        bt = PB2
         press_handler(intr_nr, bt)
     elif capa == 0xfb: 
-        bt = 2
+        bt = PB3
         press_handler(intr_nr, bt)
     elif capa == 0xf7: 
-        bt = 3
+        bt = PB4
         press_handler(intr_nr, bt)
     elif capa == 0xef: 
-        bt = 4
+        bt = PB5
         press_handler(intr_nr, bt)
     elif capa == 0xdf: 
-        bt = 5
+        bt = PB6
         press_handler(intr_nr, bt)
     elif capa == 0xbf: 
-        bt = 6
+        bt = PB7
         press_handler(intr_nr, bt)
     elif capa == 0x7f: 
-        bt = 7
+        bt = PBAutoOff
         press_handler(intr_nr, bt)
-    logger.info("mcp_handler: calling press_handler({}, {}, capa={})".format(intr_nr, bt, capa))
 
-    n = 0
     while True:
         # wait for button release
         gpa = bus.read_byte_data(expand_2, GPIOA_2)   # clears intr flag
         # print("gpa={:x}".format(gpa))
         if gpa == 0xff: 
-            logger.info("mcp_handler: button released after {}*100ms".format(n))
             release_handler(intr_nr, bt)
             break
         time.sleep(0.1)
-        n += 1
 
-    # counter += 1
+    counter += 1
     bus.write_byte_data(expand_2, GPINTENA_2, 0xff)  # enable interrupts
 
 
 
-def add_press_handler(f):
-    # f(ir_nr, key_nr)
-    global press_handler
-    press_handler = f
+def mcp_handler(intr_nr):
+    '''Interrupt Service Routine fuer I2C Expander 2, PORTA
 
+    Haengt gelegentlich nach der folgenden Logzeile:
+    2020-06-02 15:48:27,934 - kbd-logger - INFO - mcp_handler: read_interrupt NONE KEY
+    Danach erzeugt der MCP keinen Interrupt mehr.
 
-def add_release_handler(f):
-    # f(ir_nr, key_nr)
-    global release_handler
-    release_handler = f
+    Initialisierung des MCP:
+    bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: Compared agains previous pin value
+
+    Initialisierung des RPi Interrupt-Eingang:
+    GPIO.add_event_detect(17, 
+                          GPIO.RISING, 
+                          callback=mcp_handler, bouncetime=100)  
+
+    '''
+    key_nr = read_interrupt()  
+    if key_nr == None:
+        logger.info("mcp_handler: read_interrupt NONE KEY")
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
+        return  # key could not be identified
+    time.sleep(0.1)
+    capa = read_intcapa()
+    if capa == 255:
+        logger.info("mcp_handler: calling release_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
+        release_handler(intr_nr, key_nr)
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
+    else:
+        logger.info("mcp_handler: calling press_handler({}, {}, capa={})".format(intr_nr, key_nr, capa))
+        if capa == 0xfe: # P1
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xfd: # P2
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xfb: # P3
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xf7: # P4
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xef: # P5
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xdf: # P6
+            press_handler(intr_nr, key_nr)
+        elif capa == 0xbf: # P7
+            press_handler(intr_nr, key_nr)
+        elif capa == 0x7f: # PBAutoOff
+            press_handler(intr_nr, key_nr)
+        gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
+
 
 
 def init():
@@ -146,8 +204,8 @@ def init():
 
     bus.write_byte_data(expand_2, GPINTENA_2, 0xFF) #pins on interrupt
     bus.write_byte_data(expand_2, DEFVALA_2, 0xFF) #standartwert 1
-    bus.write_byte_data(expand_2, INTCONA_2, 0xFF) #1: Interrupt auf Abweichung von Defval
-    # bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: Interrupt auf vorherigen Pinzustand
+    bus.write_byte_data(expand_2, INTCONA_2, 0xFF) #1: Compared against defval
+    # bus.write_byte_data(expand_2, INTCONA_2, 0x00) #1: Compared agains previous pin value
 
     iocon = bus.read_byte_data(expand_2, IOCONA_2) #IOCON Register bearbeiten
     iocon = iocon | 0b01111010
@@ -160,28 +218,6 @@ def init():
     # INTCAP
     Gpio_wert = bus.read_byte_data(expand_2, GPIOA_2) 
 
-
-def output_write(wert):
-    '''Each bit in wert is 0 (inactive) or 1 (active). The output driver 
-    is driven active low, i.e. we have to flip each bit.
-    '''
-    wert = ~wert
-    bus.write_byte_data(expand_1, OLATB_1, wert)
-    
-
-def led_write(wert):
-    bus.write_byte_data(expand_1, OLATA_1, wert)
-      
-
-def status_led(r, g, b):
-    wert = 0
-    if r == True:
-        wert = wert+1
-    if g == True:
-        wert = wert+4
-    if b == True:
-        wert = wert+2    
-    bus.write_byte_data(expand_2, OLATB_2, wert)
 
 
 def read_interrupt():
@@ -214,7 +250,8 @@ def read_tasten():
     is clocked out during a read command of GPIO or INTCAP."
     '''
     return bus.read_byte_data(expand_2, GPIOA_2) 
-    
+
+
 
 def read_intcapa():
     '''INTCAP captures the GPIO port value at the time the interrupt
@@ -226,29 +263,18 @@ def read_intcapa():
     return bus.read_byte_data(expand_2, INTCAPA_2) 
 
 
-def cleanup():
-    # called on program exit with Ctrl-C
-    output_write(0x00)
-
-
-def my_press_handler(ir_nr, key_nr):
-    print("Button pressed. n = {}.".format(key_nr))
-
-
-def my_release_handler(ir_nr, key_nr):
-    print("Button released. n = {}.".format(key_nr))
-
-
 if __name__ == "__main__":
-
-    import atexit
-    atexit.register(cleanup)
-
-    add_press_handler(my_press_handler)
-    add_release_handler(my_release_handler)
-
+    bus = smbus.SMBus(1)
     init()
 
-    status_led(True, True, True)
-  
-    # Siehe auch interrupt_routine_expand()
+    # GPIO17 to interrupt output of MCP23017
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    GPIO.add_event_detect(17, 
+                          GPIO.RISING, 
+                          callback=mcp_handler2) 
+    
+    while True:
+        time.sleep(1)
