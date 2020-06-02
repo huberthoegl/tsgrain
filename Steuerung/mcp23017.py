@@ -46,6 +46,7 @@ def mcp_handler(intr_nr):
     # INTCAP captures the GPIO port value at the time the interrupt occured
     capa = bus.read_byte_data(expand_2, INTCAPA_2)  # clears intr flag
     # print("capa={:x}".format(capa))
+    bt = None
     if capa == 0xfe: 
         bt = 0
         press_handler(intr_nr, bt)

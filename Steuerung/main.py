@@ -38,10 +38,12 @@ def quit():
 
 def sigterm_handler(signum, frame):
     '''called when program is terminated with systemctl stop ...
-    or with shutdown -r now
+    or with "shutdown -r now". See shdn.py for the shutdown/reboot button which 
+    runs either "shutdown -r now" or "shutdown -h now" and sets a nice color
+    for the status led.
     '''
     logger.info("program received SIGTERM (signum={})".format(signum))
-    # do not switch off status led, it should be blue until reboot ends
+    # do not switch off status led, it is set in shdn.py
     # led3c.set_led(led3c.OFF)  
     o = output.Output()
     o.all_off()
