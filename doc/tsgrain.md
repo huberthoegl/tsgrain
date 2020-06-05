@@ -182,6 +182,10 @@ or
 sudo shutdown -r now
 ```
 
+### Use a Smartphone to access the RPi
+
+I use the "Admin Hands" Android app to connect to the RPi via ssh.
+Other alternatives are "ConnectBot" or "Termux".
 
 ----
 
