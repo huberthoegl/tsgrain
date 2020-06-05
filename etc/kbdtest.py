@@ -125,6 +125,7 @@ def mcp_handler(intr_nr):
     if key_nr == None:
         logger.info("mcp_handler: read_interrupt NONE KEY")
         gpa = read_tasten()  # dummy read to clear interrupt condition (1.6.20)
+        bus.write_byte_data(expand_2, GPINTENA_2, 0xff)  # enable interrupts
         return  # key could not be identified
     time.sleep(0.1)
     capa = read_intcapa()
