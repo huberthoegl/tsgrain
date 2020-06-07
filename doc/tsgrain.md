@@ -29,8 +29,11 @@ H. Högl, 2020-06-05
 
   ![DS3231 RTC](ds3231.jpg)
 
-  The only purpose of the RTC module is to set the Linux system time on 
+  The main purpose of the RTC module is to set the Linux system time on 
   startup.
+
+  The DS3231 also contains a temperature sensor. Script ``etc/rtc_temp.py`` 
+  reads out the temperature.
 
   (Reichelt)
 
