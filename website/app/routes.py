@@ -8,13 +8,13 @@ import logging
 from multiprocessing.managers import BaseManager
 from datetime import datetime, date, time, timedelta
 import json
-import config
+import conf
 import termin
 
 logger = logging.getLogger("TSGRain-Flask-Logger")
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh = logging.FileHandler(config.TSGRAIN_FLASK_LOGFILE)
+fh = logging.FileHandler(conf.TSGRAIN_FLASK_LOGFILE)
 fh.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 # ch.setLevel(logging.ERROR)
@@ -24,7 +24,7 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
-if config.IPC_FLAG:
+if conf.IPC_FLAG:
     BaseManager.register('queue_StoC')
     BaseManager.register('queue_CtoS')
     m = BaseManager(address=('localhost', 50000), authkey=b'secret')
@@ -70,7 +70,7 @@ def manuell():
         
         msg = json.dumps({"cmd": "press-button", "n": n})
         logger.info("queue_c_to_s.put: {}".format(msg))
-        if config.IPC_FLAG: 
+        if conf.IPC_FLAG: 
             queue_c_to_s.put(msg)
             resp = queue_s_to_c.get() # ok
         logger.info("queue_s_to_c.get: {}".format(resp))
@@ -78,7 +78,7 @@ def manuell():
     import time as ti; ti.sleep(0.1)
     msg = '{"cmd": "get-outputs"}'
     logger.info("queue_c_to_s.put: {}".format(msg))
-    if config.IPC_FLAG: 
+    if conf.IPC_FLAG: 
         queue_c_to_s.put(msg) 
         outputs = queue_s_to_c.get()
     # outputs is a byte (0, b6, b5, b4, b3, b2, b1, b0)
@@ -106,7 +106,7 @@ def newjob():
         dtstr = form_input.date_start.data + "T" + form_input.time_start.data + ":00"
         msg = json.dumps({"cmd": "date-exists", "date": dtstr})
         logger.info("queue_c_to_s.put: {}".format(msg))
-        if config.IPC_FLAG: queue_c_to_s.put(msg)
+        if conf.IPC_FLAG: queue_c_to_s.put(msg)
         exists = queue_s_to_c.get() # True or False
         logger.info("queue_s_to_c.get: {}".format(exists))
         if not exists:
@@ -149,7 +149,7 @@ def newjob():
             msg = '{"cmd": "store-job", "job": ' + js + '}'
             logger.info('routes.py newjob/: {}'.format(msg))
 
-            if config.IPC_FLAG: 
+            if conf.IPC_FLAG: 
                 queue_c_to_s.put(msg)
                 resp = queue_s_to_c.get() # ok
 
@@ -165,7 +165,7 @@ def newjob():
 def jobs():
 
     # Get an unsorted list of jobs
-    if config.IPC_FLAG: 
+    if conf.IPC_FLAG: 
         msg = '{"cmd": "get-jobs"}'
         queue_c_to_s.put(msg)
         jobs = queue_s_to_c.get() # list of dicts
@@ -212,7 +212,7 @@ def jobs():
 @app.route('/flipstatus', methods=['POST'])
 def jobstatus():
     datumuhrzeit_start = request.form.get('uhrzeit')
-    if config.IPC_FLAG: 
+    if conf.IPC_FLAG: 
         msg = '{"cmd": "toggle-status-by-date", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
         queue_c_to_s.put(msg)
         r = queue_s_to_c.get() 
@@ -223,7 +223,7 @@ def jobstatus():
 @app.route("/delete", methods=["POST"])
 def delete():
     datumuhrzeit_start = request.form.get('uhrzeit')
-    if config.IPC_FLAG: 
+    if conf.IPC_FLAG: 
         msg = '{"cmd": "delete-job-by-date", "date": ' + '\"'+datumuhrzeit_start+'\"' + '}'
         queue_c_to_s.put(msg)
         result = queue_s_to_c.get() 
@@ -237,7 +237,7 @@ def settings():
     class Einstellungen:
         pass
 
-    if config.IPC_FLAG: 
+    if conf.IPC_FLAG: 
         msg = '{"cmd": "get-settings" }'
         queue_c_to_s.put(msg)
         result = queue_s_to_c.get()  # list of dict
@@ -250,7 +250,7 @@ def settings():
         if isNotBlank(sfo.dauer_manuell.data):
             einstellungen.dauer_manuell = int(sfo.dauer_manuell.data)
 
-        if config.IPC_FLAG: 
+        if conf.IPC_FLAG: 
             D = {'type': 'manual_delay', 'val': int(sfo.dauer_manuell.data)}
             msg = json.dumps({"cmd": "set-settings", "manual_delay": D})
             logger.info("{}".format(msg))
@@ -278,7 +278,7 @@ def setdatetime():
             # time is set in controller/rtc.py
             pass
 
-        if config.IPC_FLAG: 
+        if conf.IPC_FLAG: 
             msg = json.dumps({"cmd": "set-datetime", 
                               "date": form_setdatetime.date_new.data,
                               "time": form_setdatetime.time_new.data})
