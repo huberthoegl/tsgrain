@@ -2,7 +2,7 @@
 from tinydb import TinyDB, Query, where
 import datetime
 from singleton import Singleton
-import config
+import conf
 
 
 q = Query()
@@ -11,7 +11,7 @@ q = Query()
 class RainDB(Singleton):
 
     def __init__(self):
-        self.db = TinyDB(config.DBPATH)  # open database
+        self.db = TinyDB(conf.DBPATH)  # open database
 
     def store_job(self, job):
         jobs = self.db.table('jobs', cache_size=0)

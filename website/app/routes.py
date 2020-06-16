@@ -272,10 +272,10 @@ def setdatetime():
 
     if form_setdatetime.validate_on_submit():
         if isNotBlank(form_setdatetime.date_new.data):
-            # date is set in Steuerung/rtc.py
+            # date is set in controller/rtc.py
             pass
         if isNotBlank(form_setdatetime.time_new.data):
-            # time is set in Steuerung/rtc.py
+            # time is set in controller/rtc.py
             pass
 
         if config.IPC_FLAG: 

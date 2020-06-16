@@ -1,8 +1,12 @@
-'''Pushbuttons on RPi with MCP23017 (I2C)
+'''Pushbutton simulation on Linux PC keyboard
+Uses keys 1, 2, 3, 4, 5, 6, 7 and 0 (Auto Off)
 '''
 
-import config
-import mcp23017
+import conf
+import logging
+from pynput import keyboard
+
+logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 
 # Panelkeys
 PB1 = 'PB1'
@@ -35,50 +39,44 @@ def key_to_index(key):
         return 7
 
 
-_instance = None
-
-
-def pb_press_handler(ir_nr, key_nr):
-    _instance._press(key_nr)
-
-def pb_release_handler(ir_nr, key_nr):
-    _instance._release(key_nr)
-
-
 class PButtons:
-
     def __init__(self):
-        # only one instantiation is allowed!
-        global _instance
+        listener = keyboard.Listener(on_press=self._press, 
+                                     on_release=self._release)
+        logger.info("pynput: starting keyboard listener thread")
+        listener.start()
         self.cblist = []
         self.panelkey = None
         self.pressed = False
-        _instance = self
-        mcp23017.add_press_handler(pb_press_handler)
-        mcp23017.add_release_handler(pb_release_handler)
 
-    def _press(self, key_nr):
+    def _release(self, key):
+        self.pressed = False
+
+    def _press(self, key):
         '''The _press() method can be called multiple times, but it calls
         the callback functions only at the first time. This is a good 
-        behaviour when the low-level key fires repeatedly on a longer 
-        press duration.
+        behaviour to handle automatic key press repetition.
         '''
-        if key_nr == 0:
-            self.panelkey = PB1
-        elif key_nr == 1:
-            self.panelkey = PB2
-        elif key_nr == 2:
-            self.panelkey = PB3
-        elif key_nr == 3:
-            self.panelkey = PB4
-        elif key_nr == 4:
-            self.panelkey = PB5
-        elif key_nr == 5:
-            self.panelkey = PB6
-        elif key_nr == 6:
-            self.panelkey = PB7
-        elif key_nr == 7:
-            self.panelkey = PBAutoOff
+        #print("you pressed:", key, type(key), key.char, type(key.char))
+        if hasattr(key, 'char'):
+            if key.char == '1':
+                self.panelkey = PB1
+            elif key.char == '2':
+                self.panelkey = PB2
+            elif key.char == '3':
+                self.panelkey = PB3
+            elif key.char == '4':
+                self.panelkey = PB4
+            elif key.char == '5':
+                self.panelkey = PB5
+            elif key.char == '6':
+                self.panelkey = PB6
+            elif key.char == '7':
+                self.panelkey = PB7
+            elif key.char == '0':
+                self.panelkey = PBAutoOff
+            else:
+                return
         else:
             return
         if not self.pressed:
@@ -86,17 +84,12 @@ class PButtons:
             for f in self.cblist:
                 f(self.panelkey)
 
-    def _release(self, key_nr): 
-        self.pressed = False
-        self.panelkey = None
-
     def subscribe(self, cb):
-        # XXX future extension: it should be possible to subscribe only 
-        # a single button, e.g. PBAutoOff
         self.cblist.append(cb)
 
     def unsubscribe(self, cb):
         self.cblist.remove(cb)
+
 
 
 if __name__ == "__main__":

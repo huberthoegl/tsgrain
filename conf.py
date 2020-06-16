@@ -20,9 +20,9 @@ if PLATFORM == 'pc':
 else:
     SEC_PER_MIN = 1
 
-DBPATH = os.path.join(homedir, 'tsgrain/Datenbank/db.json')
-LOGFILE = os.path.join(homedir, 'tsgrain/Steuerung/tsgrain.log')
-TSGRAIN_FLASK_LOGFILE = os.path.join(homedir, 'tsgrain/Website/flask.log')
+DBPATH = os.path.join(homedir, 'tsgrain/database/db.json')
+LOGFILE = os.path.join(homedir, 'tsgrain/controller/tsgrain.log')
+TSGRAIN_FLASK_LOGFILE = os.path.join(homedir, 'tsgrain/website/flask.log')
 
 # for Flask
 class Config(object):

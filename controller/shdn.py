@@ -2,12 +2,12 @@
 # http://www.netzmafia.de/skripten/hardware/RasPi/Projekt-OnOff/index.html
 
 import subprocess, time, sys, os
-import config
+import conf
 import logging
 import RPi.GPIO as GPIO
 import led3c
 
-logger = logging.getLogger(config.TSGRAIN_LOGGER)
+logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 
 
 # must be run as root

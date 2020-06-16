@@ -5,11 +5,11 @@ from datetime import timedelta
 from singleton import Singleton
 import db
 import manctrl
-import config
+import conf
 import clock1m
 import logging
 import led3c
-if config.PLATFORM == 'pc':
+if conf.PLATFORM == 'pc':
     import pbutton_pc as pbutton
 else:  # PLATFORM == 'rpi'
     import pbutton_rpi as pbutton
@@ -61,7 +61,7 @@ class Sequence:
         dt = datetime.fromisoformat(self.startstr)
         delta = timedelta(seconds=D['duration'] * 60)
         self.cts_list = []
-        for i in range(config.NCOURTS):
+        for i in range(conf.NCOURTS):
             if D['courts'][i] == '*':
                 cts = CourtTimeslot(i, dt, dt + delta, self.jobdict)
                 self.cts_list.append(cts) 
@@ -116,7 +116,7 @@ class Sequence:
 
 class AutoCtrl(Singleton):
     def __init__(self):
-        self.logger = logging.getLogger(config.TSGRAIN_LOGGER)
+        self.logger = logging.getLogger(conf.TSGRAIN_LOGGER)
         clock1m.add_handler(self.min1cb)
         clock1m.start()
         self.rdb = db.RainDB() # singleton

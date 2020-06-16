@@ -1,11 +1,11 @@
 '''Manual pushbutton controller.
 '''
 
-import config
+import conf
 import monodelay
 import logging
 import output
-if config.PLATFORM == 'pc':
+if conf.PLATFORM == 'pc':
    import pbutton_pc as pbutton
 else:  # PLATFORM == 'rpi'
    import pbutton_rpi as pbutton
@@ -22,7 +22,7 @@ class ManCtrl(Singleton):
 
     def __init__(self, ticks=None, out=None):
         self.out = output.Output()
-        self.logger = logging.getLogger(config.TSGRAIN_LOGGER)
+        self.logger = logging.getLogger(conf.TSGRAIN_LOGGER)
         self.state = MC_INACTIVE
         self.disabled = False
         if ticks: self.dtimer = monodelay.Monodelay(ticks)
@@ -52,7 +52,7 @@ class ManCtrl(Singleton):
         elif not self.disabled and self.state == MC_INACTIVE:
             self.key = key
             self.state = MC_ACTIVE
-            delay_in_s = int(self.db.get_setting_val('manual_delay'))*config.SEC_PER_MIN
+            delay_in_s = int(self.db.get_setting_val('manual_delay'))*conf.SEC_PER_MIN
             self.dtimer.set_delay(delay_in_s)
             self.dtimer.set_cb(self.delay_end)
             self.dtimer.run()

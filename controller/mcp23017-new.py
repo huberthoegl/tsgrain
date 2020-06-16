@@ -7,11 +7,11 @@ import time
 import array
 import math
 import logging
-import config
+import conf
  
 bus = smbus.SMBus(1)
 
-logger = logging.getLogger(config.TSGRAIN_LOGGER)
+logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 
 press_handler = None
 release_handler = None

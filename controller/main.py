@@ -1,6 +1,6 @@
 
 
-import config
+import conf
 import atexit
 import controller
 import time
@@ -14,10 +14,10 @@ import output
 
 # https://docs.python.org/3/howto/logging-cookbook.html
 # levels: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
-logger = logging.getLogger(config.TSGRAIN_LOGGER)
+logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh = logging.FileHandler(config.LOGFILE)
+fh = logging.FileHandler(conf.LOGFILE)
 fh.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 # ch.setLevel(logging.ERROR)

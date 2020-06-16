@@ -1,8 +1,8 @@
 
-import config
+import conf
 import logging
 
-if config.PLATFORM == 'rpi':
+if conf.PLATFORM == 'rpi':
     import mcp23017   # must have been initlzd with mcp23017.init() 
 
 # Colors: rot, gruen, blau, gelb, violett, tuerkis, weiss
@@ -23,7 +23,7 @@ currentcolor = None
 
 def init():
     global logger
-    logger = logging.getLogger(config.TSGRAIN_LOGGER)
+    logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 
 
 def set_led(color=GREEN):
@@ -32,28 +32,28 @@ def set_led(color=GREEN):
     # XXX too much logging for set_led red (auto mode)
     # logger.info("led3c set_led {}".format(color))
     if color == OFF:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(False, False, False) 
     if color == RED:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(True, False, False) 
     if color == GREEN:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(False, True, False) 
     if color == BLUE:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(False, False, True) 
     if color == TUERKIS:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(False, True, True) 
     if color == VIOLET:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(True, False, True) 
     if color == YELLOW:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(True, True, False) 
     if color == WHITE:
-        if config.PLATFORM == 'rpi':
+        if conf.PLATFORM == 'rpi':
             mcp23017.status_led(True, True, True) 
 
 

@@ -6,12 +6,12 @@
 
 import logging, threading, functools
 import time
-import config
+import conf
 
 
 class PeriodicTimer(object):
     def __init__(self, interval, callback):
-        self.logger = logging.getLogger(config.TSGRAIN_LOGGER)
+        self.logger = logging.getLogger(conf.TSGRAIN_LOGGER)
         self.interval = interval
 
         @functools.wraps(callback)

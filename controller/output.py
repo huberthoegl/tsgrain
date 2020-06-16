@@ -3,14 +3,14 @@
 The output numbers n are 0 (bit0) to 6 (bit6).
 '''
 
-import config
+import conf
 from singleton import Singleton
-if config.PLATFORM == 'rpi':
+if conf.PLATFORM == 'rpi':
     import mcp23017
 
 
 
-if config.PLATFORM == 'pc':
+if conf.PLATFORM == 'pc':
     def write_outputs_and_leds(bits):
         print("PC only: write_outputs_and_leds: {:02x}".format(bits))
 else:

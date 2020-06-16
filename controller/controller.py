@@ -1,7 +1,7 @@
 
 # controller
 
-import config
+import conf
 import tick
 import manctrl
 import autoctrl
@@ -11,7 +11,7 @@ import sys
 import time
 from singleton import Singleton
 
-if config.PLATFORM == 'pc':
+if conf.PLATFORM == 'pc':
    import pbutton_pc as pbutton
 else:  # PLATFORM == 'rpi'
    import pbutton_rpi as pbutton
@@ -34,7 +34,7 @@ MAN_STATE = 'man-state'
 class Controller(Singleton):
 
     def __init__(self):
-        self.logger = logging.getLogger(config.TSGRAIN_LOGGER)
+        self.logger = logging.getLogger(conf.TSGRAIN_LOGGER)
         led3c.set_led(led3c.GREEN)
         ticks.start()
         self.state = MAN_STATE

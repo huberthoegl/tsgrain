@@ -5,13 +5,13 @@ import threading
 import logging
 import queue
 from multiprocessing.managers import BaseManager
-import config
+import conf
 import manctrl
 import json
 import db
 import led3c
 
-if config.PLATFORM == 'pc':
+if conf.PLATFORM == 'pc':
    import pbutton_pc as pbutton
 else:
    import pbutton_rpi as pbutton
@@ -24,7 +24,7 @@ logger = None
 thr = None
 bmg = None
 running = True
-logger = logging.getLogger(config.TSGRAIN_LOGGER)
+logger = logging.getLogger(conf.TSGRAIN_LOGGER)
 rdb = db.RainDB() # singleton
 manual_control = None
 
@@ -122,7 +122,7 @@ def worker():
                queue_s_to_c.put("ok")  
 
             if D['cmd'] == 'set-datetime':
-               if config.PLATFORM == 'rpi':
+               if conf.PLATFORM == 'rpi':
                    # XXX to do: must be rewritten
                    # rtc.RTCChangeDate(D['date'])
                    # rtc.RTCChangeTime(D['time'])
